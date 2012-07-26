@@ -1,0 +1,26 @@
+The aim of this project is using the Piccolo C2000 Control Stick for controlling the switch states of several DC/DC Switch Mode Converters.
+
+We start from a project example provided in the C2000 Piccolo 1-Day Workshop which can be downloaded from the Texas Instruments web page.
+
+All the project will be developed with Code Composer 5.2
+
+As we can see the project is written in C.
+
+Every project consists of several files. The most important ones for this project are explained below.
+
+	Main.c --> Initializes all the modules of the Control Stick and enters in a permanent loop waiting for interruptions to work.
+	
+	Gpio.c --> General Purpose Input/Output. Here we assign the pins of the Control Stick to the output of the modules. For example we can assign a pin as ADC so we can read the signal connected to it, or as PWM, so we can use the output of de PWM module in our converter.
+	
+	EPwm.c --> Enchanced Pulse Width Modulation. It manages the behaviour of the EPwm module, where we can generate PWM. More information is provided in "ePWM_spruge9d.pdf" in the doc folder.
+	
+	Adc.c --> Analog to Digital Conversion module. Once configured it can be used to measure voltage inputs between 0-3.3v. We must generate a SOC (Start of Conversion) pulse with the Epwm Module. In Adc.c we will assign this pulse to an Adc channel and set other options.
+	
+	DefaultIsr.c --> Here we handle the code of all the possible interrupts we can generate with the rest of the modules.
+	
+	
+	
+	
+	
+	
+
