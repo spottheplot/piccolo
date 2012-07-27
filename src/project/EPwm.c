@@ -42,7 +42,7 @@ void InitEPwm(void)
 // bit 1-0       11:     CTRMODE, 11 = timer stopped (disabled)
 
 	EPwm1Regs.TBCTR = 0x0000;				// Clear timer counter
-	EPwm1Regs.TBPRD = PWM_HALF_PERIOD;		// Set timer period
+	EPwm1Regs.TBPRD = PWM_PERIOD;		// Set timer period
 	EPwm1Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase to 0
 
 	// 2. Compare Module
@@ -59,13 +59,13 @@ void InitEPwm(void)
 // bit 3-2       00:     LOADBMODE, don't care
 // bit 1-0       10:     LOADAMODE, 10 = load on zero or PRD match
 
-	EPwm1Regs.AQCTLA.all = 0x0060;		// Action-qualifier control register A
+	EPwm1Regs.AQCTLA.all = 0x0064;		// Action-qualifier control register A
 // bit 15-12     0000:   reserved
 // bit 11-10     00:     CBD, 00 = do nothing
 // bit 9-8       00:     CBU, 00 = do nothing
 // bit 7-6       01:     CAD, 01 = clear
 // bit 5-4       10:     CAU, 10 = set
-// bit 3-2       00:     PRD, 00 = do nothing
+// bit 3-2       00:     PRD, 01 = clear
 // bit 1-0       00:     ZRO, 00 = do nothing
 
 //	EPwm1Regs.AQCTLB.all = 0x0090;		// Action-qualifier control register B
@@ -101,11 +101,13 @@ void InitEPwm(void)
 
 	// 5. PWM Chopper Module
 	EPwm1Regs.PCCTL.bit.CHPEN = 0;		// PWM chopper unit disabled
+
+	// 6. Trip Zone and DC Compare Modules
 	EPwm1Regs.TZDCSEL.all = 0x0000;		// All trip zone and DC compare actions disabled
 
-	// 6. Set the timer
-	EPwm1Regs.TBCTL.bit.CTRMODE = 0x2;	// Enable the timer in count up/down mode
-
+	// 7. Set the timer
+	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;	// Enable the timer in count up mode
+// 0 Count Up || 1 Count Down || 2 Count Up/Down
 
 //---------------------------------------------------------------------
 //--- Configure ePWM2
@@ -126,7 +128,7 @@ void InitEPwm(void)
 // bit 1-0       11:     CTRMODE, 11 = timer stopped (disabled)
 
 	EPwm2Regs.TBCTR = 0x0000;				// Clear timer counter
-	EPwm2Regs.TBPRD = PWM_HALF_PERIOD;		// Set timer period
+	EPwm2Regs.TBPRD = PWM_PERIOD;		// Set timer period
 	EPwm2Regs.TBPHS.half.TBPHS = PWM_HALF_PERIOD ;	// Set timer phase to 180º
 														// It will start at half the period
 														// Check 3.8 in ePWM.pdf
@@ -147,13 +149,13 @@ void InitEPwm(void)
 
 // 3. Action Qualifier Module
 
-	EPwm2Regs.AQCTLA.all = 0x0060;		// Action-qualifier control register A
+	EPwm2Regs.AQCTLA.all = 0x0064;		// Action-qualifier control register A
 // bit 15-12     0000:   reserved
 // bit 11-10     00:     CBD, 00 = do nothing
 // bit 9-8       00:     CBU, 00 = do nothing
 // bit 7-6       01:     CAD, 01 = clear
 // bit 5-4       10:     CAU, 10 = set
-// bit 3-2       00:     PRD, 00 = do nothing
+// bit 3-2       00:     PRD, 01 = clear
 // bit 1-0       00:     ZRO, 00 = do nothing
 
 //	EPwm2Regs.AQCTLB.all = 0x0090;		// Action-qualifier control register B
@@ -188,10 +190,13 @@ void InitEPwm(void)
 
 // 5. PWM Chopper Module
 	EPwm2Regs.PCCTL.bit.CHPEN = 0;		// PWM chopper unit disabled
+
+// 6. Trip Zone and DC Compare Modules
 	EPwm2Regs.TZDCSEL.all = 0x0000;		// All trip zone and DC compare actions disabled
 
-// 6. Set the timer
-	EPwm2Regs.TBCTL.bit.CTRMODE = 0x2;	// Enable the timer in count up/down mode
+// 7. Set the timer
+	EPwm2Regs.TBCTL.bit.CTRMODE = 0x0;	// Enable the timer in count up mode
+	// 0 Count Up || 1 Count Down || 2 Count Up/Down
 
 
 //---------------------------------------------------------------------
