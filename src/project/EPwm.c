@@ -96,7 +96,7 @@ void InitEPwm(void)
 	EPwm1Regs.DBCTL.bit.IN_MODE = 00;   // Select EpwmA as input for Rise and Falling Edges
 	EPwm1Regs.DBCTL.bit.POLSEL = 10;
 	EPwm1Regs.DBCTL.bit.HALFCYCLE = 0;
-	EPwm1Regs.DBRED = 5;
+	EPwm1Regs.DBRED = 5;	// Each clock cycle lasts 1/60MHz = 16,66666 ns. We'll need different dead bands in each converter
 	EPwm1Regs.DBFED = 5;
 
 	// 5. PWM Chopper Module
