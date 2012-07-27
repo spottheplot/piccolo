@@ -24,7 +24,6 @@ void InitEPwm(void)
 	SysCtrlRegs.PCLKCR0.bit.TBCLKSYNC = 0;
 	asm(" EDIS");						// Disable EALLOW protected register access
 
-
 //---------------------------------------------------------------------
 //--- Configure ePWM1
 //---------------------------------------------------------------------
@@ -106,6 +105,7 @@ void InitEPwm(void)
 
 	// 6. Set the timer
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x2;	// Enable the timer in count up/down mode
+
 
 //---------------------------------------------------------------------
 //--- Configure ePWM2
@@ -192,6 +192,7 @@ void InitEPwm(void)
 
 // 6. Set the timer
 	EPwm2Regs.TBCTL.bit.CTRMODE = 0x2;	// Enable the timer in count up/down mode
+
 
 //---------------------------------------------------------------------
 //--- Enable the clocks to the ePWM module.                   

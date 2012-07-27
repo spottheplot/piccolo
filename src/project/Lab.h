@@ -30,8 +30,9 @@
 //
 #define ADC_BUF_LEN			50				// ADC buffer length
 #define ADC_SAMPLE_PERIOD	1199			// 1199 = (1200-1) = 50 KHz sampling w/ 60 MHz SYSCLKOUT
-#define PWM_HALF_PERIOD		15000			// period/2 for 2 kHz symmetric PWM
-#define PWM_DUTY_CYCLE		5000			// 25% duty cycle //11250 Orig
+#define PWM_HALF_PERIOD		300			// period/2 for 100 kHz symmetric PWM //15000 Orig for 2 khz
+										// Como el reloj del sistema va a 60 Mhz se calcula --> 60 Mhz / X Hz / 2
+#define PWM_DUTY_CYCLE		217.5			// 3.3 / 12 = 27.5% duty cycle //11250 Orig for 25% duty cycle
 
 
 //---------------------------------------------------------------------------

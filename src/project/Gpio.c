@@ -56,6 +56,9 @@ void InitGpio(void)
 	GpioCtrlRegs.GPBMUX1.bit.GPIO37 = 0;		// 0=GPIO (TDO)         1=rsvd      2=rsvd       3=rsvd
 	GpioCtrlRegs.GPBMUX1.bit.GPIO38 = 0;		// 0=GPIO/XCLKIN (TCK)  1=rsvd      2=rsvd       3=rsvd
 
+// GPIO Direction (Enable Output)
+
+
 // Analog I/O Mux pins
 	GpioCtrlRegs.AIOMUX1.bit.AIO2 = 2;			// 0,1=AIO2             2,3=ADCINA2/COMP1A
 	GpioCtrlRegs.AIOMUX1.bit.AIO4 = 2;			// 0,1=AIO4             2,3=ADCINA4/COMP2A
@@ -86,7 +89,12 @@ void InitGpio(void)
 //--- Selected pin configurations
 	GpioCtrlRegs.GPBDIR.bit.GPIO34 = 1;			// GPIO34 is an output (connected to LED on F28027 ControlStick)
 	GpioDataRegs.GPBSET.bit.GPIO34 = 1;			// GPIO34 pin is set to 1 (turn LED on)
+
 	GpioCtrlRegs.GPADIR.bit.GPIO18 = 1;			// GPIO18 is an output (used for test - pin toggle)
+
+	GpioCtrlRegs.GPADIR.bit.GPIO12 = 1; 		// Enable GPIO12 as output
+	GpioDataRegs.GPADAT.bit.GPIO12 = 1;         // Set GPIO 12 to high
+
 
 //--- Finish up
 	asm(" EDIS");								// Disable EALLOW protected register access
