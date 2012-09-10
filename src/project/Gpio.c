@@ -95,6 +95,9 @@ void InitGpio(void)
 	GpioCtrlRegs.GPADIR.bit.GPIO12 = 1; 		// Enable GPIO12 as output
 	GpioDataRegs.GPADAT.bit.GPIO12 = 1;         // Set GPIO 12 to high
 
+	GpioCtrlRegs.GPADIR.bit.GPIO7 = 1; 		// Enable GPIO7 as output
+	GpioDataRegs.GPADAT.bit.GPIO7 = 1;         // Set GPIO7 to high
+
 
 //--- Finish up
 	asm(" EDIS");								// Disable EALLOW protected register access

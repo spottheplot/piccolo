@@ -1,1 +1,8 @@
 In this example we will set a 1 phase buck converter with a fixed duty cycle and frequency without any kind of loop.
+
+We can control the buck converter through the Connector 2 with the following signals.
+	V1, V2 --> They will control the PWM of one of the two phases of the buck converter
+	V3, V4 --> They control the second phase. In this example they will be connected to ground as we won't be using it.
+	V5, V6, V7 --> They will control the load by connecting several resistors in parallel
+	
+We will be have 12V input voltage and 5V output voltage, so the duty cycle will be 5 / 12 = 0.4167

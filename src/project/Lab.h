@@ -30,12 +30,18 @@
 //
 #define ADC_BUF_LEN			50				// ADC buffer length
 #define ADC_SAMPLE_PERIOD	1199			// 1199 = (1200-1) = 50 KHz sampling w/ 60 MHz SYSCLKOUT
-#define PWM_HALF_PERIOD		300			// period/2 for 100 kHz symmetric PWM //15000 Orig for 2 khz
-										// Como el reloj del sistema va a 60 Mhz se calcula --> 60 Mhz / X Hz / 2
-#define PWM_PERIOD		599 // 599 = 600 -1  Period for 100 kHz Asymmetric PWM
-#define PWM_DUTY_CYCLE		435			// 3.3 / 12 = 27.5% duty cycle --> 435 for Asymmetric  PWM
-																											//217.5 for Symmetric PWM
 
+// Frequency for symmetric PWM
+//  The system clock runs at 60 Mhz --> 60 Mhz / X Hz / 2 = PWM__HALF_PERIOD
+#define PWM_HALF_PERIOD		300			// period/2 for 100 kHz symmetric PWM //15000 Orig for 2 khz
+
+// Frequency for asymmetric PWM
+//  The system clock runs at 60 Mhz --> ( 60 Mhz / X Hz ) - 1 = PWM_PERIOD
+#define PWM_PERIOD		599 // 599 = 600 -1  Period for 100 kHz Asymmetric PWM
+
+// Duty cycle. The counter will go up each clock cycle. When it reaches PWM_DUTY_CYCLE, it will set PWM signal high.
+// It will remain high until the counter reaches PWM_PERIOD or PWM_HALF_PERIOD. Then the PWM signal and the counter will be reset to 0
+#define PWM_DUTY_CYCLE		350			// 5 / 12 = 41.67% duty cycle --> 350 for Asymmetric  PWM
 
 //---------------------------------------------------------------------------
 // Function Prototypes
