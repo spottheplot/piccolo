@@ -1,0 +1,12 @@
+In this example we will set the code necessary for using a 1 phase buck converter controlled by a current hysteresis band. 
+
+We will calculate the current rip in the coil and set 2 bands in the piccolo's comparator. Depending on the load and the current average we want to determine Vout, we will set and upper and a lower band. When the current reaches the upper band, the PWM will turn off and when the current reaches the lower band the PWM will turn on.
+
+We will also need to calculate the current gain through the current sensor and the controller, so we can determine the bands.
+
+We can control the buck converter through the Connector 2 with the following signals.
+	V1, V2 --> They will control the PWM of one of the two phases of the buck converter.
+	V3, V4 --> They control the second phase. In this example they will be connected to ground as we won't be using it.
+	V5, V6, V7 --> They will control the load by connecting several resistors in parallel.
+	
+We will have 12V input voltage and 5V output voltage.
