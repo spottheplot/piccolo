@@ -45,10 +45,10 @@ void InitEPwm(void)
 	EPwm1Regs.TBPRD = PWM_PERIOD;		// Set timer period
 	EPwm1Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase to 0
 
-	// 2. Compare Module
-	EPwm1Regs.CMPA.half.CMPA = PWM_DUTY_CYCLE;	// Set PWM duty cycle
+	// 2. Compare Module --> We don't need this module set for this example
+//	EPwm1Regs.CMPA.half.CMPA = PWM_DUTY_CYCLE;	// Set PWM duty cycle
 
-	EPwm1Regs.CMPCTL.all = 0x0002;			// Compare control register
+//	EPwm1Regs.CMPCTL.all = 0x0002;			// Compare control register
 // bit 15-10     0's:    reserved
 // bit 9         0:      SHDWBFULL, read-only
 // bit 8         0:      SHDWAFULL, read-only
@@ -59,7 +59,8 @@ void InitEPwm(void)
 // bit 3-2       00:     LOADBMODE, don't care
 // bit 1-0       10:     LOADAMODE, 10 = load on zero or PRD match
 
-	EPwm1Regs.AQCTLA.all = 0x0064;		// Action-qualifier control register A
+	// 3. Action-Qualifier Module
+//	EPwm1Regs.AQCTLA.all = 0x0064;		// Action-qualifier control register A
 // bit 15-12     0000:   reserved
 // bit 11-10     00:     CBD, 00 = do nothing
 // bit 9-8       00:     CBU, 00 = do nothing
@@ -77,7 +78,7 @@ void InitEPwm(void)
 // bit 3-2       00:     PRD, 00 = do nothing
 // bit 1-0       00:     ZRO, 00 = do nothing
 
-	EPwm1Regs.AQSFRC.all = 0x0000;		// Action-qualifier s/w force register
+//	EPwm1Regs.AQSFRC.all = 0x0000;		// Action-qualifier s/w force register
 // bit 15-8      0's:    reserved
 // bit 7-6       00:     RLDCSF, 00 = reload AQCSFRC on zero
 // bit 5         0:      OTSFB, 0 = do not initiate a s/w forced event on output B
@@ -85,7 +86,7 @@ void InitEPwm(void)
 // bit 2         0:      OTSFA, 0 = do not initiate a s/w forced event on output A
 // bit 1-0       00:     ACTSFA, don't care
 
-	EPwm1Regs.AQCSFRC.all = 0x0000;		// Action-qualifier continuous s/w force register
+//	EPwm1Regs.AQCSFRC.all = 0x0000;		// Action-qualifier continuous s/w force register
 // bit 15-4      0's:    reserved
 // bit 3-2       00:     CSFB, 00 = forcing disabled
 // bit 1-0       00:     CSFA, 00 = forcing disabled
@@ -104,6 +105,72 @@ void InitEPwm(void)
 
 	// 6. Trip Zone and DC Compare Modules
 	EPwm1Regs.TZDCSEL.all = 0x0000;		// All trip zone and DC compare actions disabled
+
+		// Clear EPwm1A when the input in the comparator 1 is higher than the reference
+				EPwm1Regs.DCTRIPSEL.bit.DCAHCOMPSEL = 1000; // Select the source for the Digital Compare A High (DCAH) input
+						//	0000 TZ1 input
+						//	0001 TZ2 input
+						//	0010 TZ3 input
+						//	1000 COMP1OUT input
+						//	1001 COMP2OUT input
+
+				// Once set the event signal creation, we want the Trip-Zone Submodule to catch the event and handle it
+				EPwm1Regs.TZDCSEL.bit.DCAEVT2 = 010; //The event signal DCAEVT2 will be sent when Comp1Out goes high
+						//	000 Event disabled
+						//	001 DCAH = low, DCAL = don't care
+						//	010 DCAH = high, DCAL = don't care
+						//	011 DCAL = low, DCAH = don't care
+						//	100 DCAL = high, DCAH = don't
+
+				EPwm1Regs.DCACTL.bit.EVT2SRCSEL = 0; // Here we choose if we want to filter the signal
+						// 0 Source is DCAEVT Signal
+						// 1 Source is DCAEVTFILT Signal
+
+				EPwm1Regs.DCACTL.bit.EVT2FRCSYNCSEL = 0;  // Force Sync Signal Select
+						// 0 Source is Sync signal
+						// 1 Source is Async Signal
+
+				EPwm1Regs.TZSEL.bit.DCAEVT2 = 1;
+						// 1 Enable DCAEVT2 as a CBC trip source event for this ePWM module
+
+				EPwm1Regs.TZCTL.bit.TZA = 10; // When a trip event occurs the following action is taken on output EPwm1A
+						//	00 High-impedance (EPWMxA = High-impedance state)
+						//	01 Force EPWMxA to a high state.
+						//	10 Force EPWMxA to a low state.
+						//	11 Do Nothing, trip action is disabled
+
+		// Set EPwm1B when the input in the comparator 2 is lower than the reference
+				EPwm1Regs.DCTRIPSEL.bit.DCBLCOMPSEL = 1001; // Digital Compare B Low Input Select
+						//	0000 TZ1 input
+						//	0001 TZ2 input
+						//	0010 TZ3 input
+						//	1000 COMP1OUT input
+						//	1001 COMP2OUT input
+
+				// Once set the event signal creation, we want the Trip-Zone Submodule to catch the event and handle it
+				EPwm1Regs.TZDCSEL.bit.DCBEVT2 = 011; //The event signal DCAEVT2 will be sent when Comp2Out goes low
+						//	000 Event disabled
+						//	001 DCBH = low, DCBL = don't care
+						//	010 DCBH = high, DCBL = don't care
+						//	011 DCBL = low, DCBH = don't care
+						//	100 DCBL = high, DCBH = don't
+
+				EPwm1Regs.DCBCTL.bit.EVT2SRCSEL = 0; // Here we choose if we want to filter the signal
+						// 0 Source is DCBEVT Signal
+						// 1 Source is DCBEVTFILT Signal
+
+				EPwm1Regs.DCBCTL.bit.EVT2FRCSYNCSEL = 0;  // Force Sync Signal Select
+						// 0 Source is Sync signal
+						// 1 Source is Async Signal
+
+				EPwm1Regs.TZSEL.bit.DCBEVT2 = 1;
+						// 1 Enable DCBEVT2 as a CBC trip source event for this ePWM module
+
+				EPwm1Regs.TZCTL.bit.TZB = 01; // When a trip event occurs the following action is taken on output EPwm1A
+						//	00 High-impedance (EPWMxB = High-impedance state)
+						//	01 Force EPWMxB to a high state.
+						//	10 Force EPWMxB to a low state.
+						//	11 Do Nothing, trip action is disabled
 
 	// 7. Set the timer
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;	// Enable the timer in count up mode
