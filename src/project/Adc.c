@@ -58,18 +58,18 @@ void InitAdc(void)
 		Comp1Regs.COMPCTL.bit.QUALSEL =  0; // Don't Care
 
 		Comp1Regs.DACVAL.bit.DACVAL = 500; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
+
+	//--- Comparator 2 Configuration --> If (input + > input -) --> CompOut = 1
+														// If (input + < input -) --> CompOut = 0
+		Comp2Regs.COMPCTL.bit.COMPDACEN = 1; // Enable Comparator 2
+		Comp2Regs.COMPCTL.bit.CMPINV = 0; // If you want to invert the output
+		Comp2Regs.COMPCTL.bit.COMPSOURCE = 0;	// 1  Both comparator inputs connected to external pin
+																			// 0 Input - is generated internally via DAC and compared to an input  + which is an external pin
+		Comp2Regs.COMPCTL.bit.SYNCSEL = 0; //Asynchronous Comp1 Output
+		Comp2Regs.COMPCTL.bit.QUALSEL =  0; // Don't Care
+		Comp2Regs.DACVAL.bit.DACVAL = 0; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
+
 		AdcRegs.ADCCTL1.bit.ADCBGPWD = 1; // It's already been enabled, but it's necessary to enable it for the comparator to work
-
-		//--- Comparator 2 Configuration --> If (input + > input -) --> CompOut = 1
-															// If (input + < input -) --> CompOut = 0
-			Comp2Regs.COMPCTL.bit.COMPDACEN = 1; // Enable Comparator 2
-			Comp2Regs.COMPCTL.bit.CMPINV = 0; // If you want to invert the output
-			Comp2Regs.COMPCTL.bit.COMPSOURCE = 0;	// 1  Both comparator inputs connected to external pin
-																				// 0 Input - is generated internally via DAC and compared to an input  + which is an external pin
-			Comp2Regs.COMPCTL.bit.SYNCSEL = 0; //Asynchronous Comp1 Output
-			Comp2Regs.COMPCTL.bit.QUALSEL =  0; // Don't Care
-
-			Comp2Regs.DACVAL.bit.DACVAL = 0; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
 
 //--- Finish up
 	AdcRegs.ADCCTL1.bit.ADCENABLE = 1;	// Enable the ADC
