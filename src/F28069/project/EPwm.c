@@ -109,42 +109,46 @@ void InitEPwm(void)
 
 		EPwm1Regs.TZDCSEL.all = 0x0000;		// All trip zone and DC compare actions disabled
 
-//		// Clear EPwm1A when the input in the comparator 1 is higher than the reference
-//				EPwm1Regs.DCTRIPSEL.bit.DCAHCOMPSEL = 8; // Select the source for the Digital Compare A High (DCAH) input --> Comp1Out = DCAH
-//						//	0000 TZ1 input
-//						//	0001 TZ2 input
-//						//	0010 TZ3 input
-//						//	1000 COMP1OUT input
-//						//	1001 COMP2OUT input
-//						// 1010 COMP3OUT input
-//
-//				// Once set the event signal creation, we want the Trip-Zone Submodule to catch the event and handle it
-//				EPwm1Regs.TZDCSEL.bit.DCAEVT1 = 1;//2; //The event signal DCAEVT1 will be sent when Comp1Out goes high (DCAH High)
-//						//	0 || 000 Event disabled
-//						//	1 || 001 DCAH = low, DCAL = don't care
-//						//	2 || 010 DCAH = high, DCAL = don't care
-//						//	3 || 011 DCAL = low, DCAH = don't care
-//						//	4 || 100 DCAL = high, DCAH = don't care
-//						//	5 || 101 DCAL = high, DCAH = low
-//
-//				EPwm1Regs.DCACTL.bit.EVT2SRCSEL = 0; // Here we choose if we want to filter the signal
-//						// 0 Source is DCAEVT Signal
-//						// 1 Source is DCAEVTFILT Signal
-//
-//				EPwm1Regs.DCACTL.bit.EVT2FRCSYNCSEL = 1;  // Force Sync Signal Select
-//						// 0 Source is Sync signal
-//						// 1 Source is Async Signal
-//
-////				EPwm1Regs.TZSEL.bit.DCAEVT2 = 0;
-//						// 1 Disable DCAEVT2 as a CBC trip source event for this ePWM module
-//
-//				EPwm1Regs.TZCTL.bit.DCAEVT1 = 1;//2; // When a trip event occurs the following action is taken on output EPwm1A
-//						//0 || 	00 High-impedance (EPWMxA = High-impedance state)
-//						//	1 || 01 Force EPWMxA to a high state.
-//						//	2 || 10 Force EPWMxA to a low state.
-//						//	3 || 11 Do Nothing, trip action is disabled
+		// Clear EPwm1A when the input in the comparator 1 is higher than the reference (by generating DCAEVT1)
+				EPwm1Regs.DCTRIPSEL.bit.DCAHCOMPSEL = 8; // Select the source for the Digital Compare A High (DCAH) input --> Comp1Out = DCAH
+						//	0000 TZ1 input
+						//	0001 TZ2 input
+						//	0010 TZ3 input
+						//	1000 COMP1OUT input
+						//	1001 COMP2OUT input
+						// 1010 COMP3OUT input
 
-		// Set EPwm1A when the input in the comparator 2 is lower than the reference
+				// Once set the event signal creation, we want the Trip-Zone Submodule to catch the event and handle it
+				EPwm1Regs.TZDCSEL.bit.DCAEVT1 = 2;//1; //The event signal DCAEVT1 will be sent when Comp1Out goes high (DCAH High)
+						//	0 || 000 Event disabled
+						//	1 || 001 DCAH = low, DCAL = don't care
+						//	2 || 010 DCAH = high, DCAL = don't care
+						//	3 || 011 DCAL = low, DCAH = don't care
+						//	4 || 100 DCAL = high, DCAH = don't care
+						//	5 || 101 DCAL = high, DCAH = low
+
+				EPwm1Regs.DCACTL.bit.EVT2SRCSEL = 0; // Here we choose if we want to filter the signal
+						// 0 Source is DCAEVT Signal
+						// 1 Source is DCAEVTFILT Signal
+
+				EPwm1Regs.DCACTL.bit.EVT2FRCSYNCSEL = 1;  // Force Sync Signal Select
+						// 0 Source is Sync signal
+						// 1 Source is Async Signal
+
+//				EPwm1Regs.TZSEL.bit.DCAEVT1 = 0;
+						// 1 Disable DCAEVT2 as a CBC trip source event for this ePWM module
+
+				EPwm1Regs.TZCTL.bit.DCAEVT1 = 2;//1; // When a trip event occurs the following action is taken on output EPwm1A
+						//0 || 	00 High-impedance (EPWMxA = High-impedance state)
+						//	1 || 01 Force EPWMxA to a high state.
+						//	2 || 10 Force EPWMxA to a low state.
+						//	3 || 11 Do Nothing, trip action is disabled
+
+				EPwm1Regs.TZEINT.bit.DCAEVT1 = 1; //Digital Comparator Output A Event 2 Interrupt Enable
+										//0 Disabled
+										//1 Enabled
+
+		// Set EPwm1A when the input in the comparator 2 is lower than the reference (by generating DCAEVT2)
 				EPwm1Regs.DCTRIPSEL.bit.DCALCOMPSEL = 9; // Digital Compare A Low Input Select
 						//	0 || 0000 TZ1 input
 						//	1 || 0001 TZ2 input
@@ -173,17 +177,21 @@ void InitEPwm(void)
 //				EPwm1Regs.TZSEL.bit.DCAEVT1 = 0;
 						// 1 Enable DCBEVT2 as a CBC trip source event for this ePWM module
 
-				EPwm1Regs.TZCTL.bit.DCAEVT2 = 1; // When a trip event occurs the following action is taken on output EPwmxA
+//				EPwm1Regs.TZCTL.bit.DCAEVT2 = 1; // When a trip event occurs the following action is taken on output EPwmxA
 						//0 || 00 High-impedance (EPWMxB = High-impedance state)
 						//	1 || 01 Force EPWMxA to a high state.
 						//	2 || 10 Force EPWMxA to a low state.
 						//	3 || 11 Do Nothing, trip action is disabled
 
-		asm(" EDIS");						// Disable EALLOW protected register access
+				EPwm1Regs.TZEINT.bit.DCAEVT2 = 1; //Digital Comparator Output A Event 2 Interrupt Enable
+						//0 Disabled
+						//1 Enabled
 
 				// Enable PIE interrupts from TZ for EPwm1 (EPWM1_TZINT)
-					PieCtrlRegs.PIEIER1.bit.INTx1 = 1; // Enable EPWM_TZINT in PIE group 2
-					IER |= 0x0002; // Enable INT2 in IER to enable PIE group 2
+				PieCtrlRegs.PIEIER2.bit.INTx1 = 1; // Enable EPWM_TZINT in PIE group 2
+				IER |= 0x0002; // Enable INT2 in IER to enable PIE group 2
+
+		asm(" EDIS");						// Disable EALLOW protected register access
 
 	// 7. Set the timer
 //	EPwm1Regs.TBCTL.bit.CTRMODE = 0x2;	// Enable the timer in count up/down mode
@@ -198,6 +206,5 @@ void InitEPwm(void)
 	asm(" EDIS");							// Disable EALLOW protected register access
 
 } // end InitEPwm()
-
 
 //--- end of file -----------------------------------------------------

@@ -263,11 +263,50 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
+
+//		// If DCAEVT1 generated this interruption
+	if (Comp1Regs.COMPSTS.bit.COMPSTS == 1) {
+		EPwm1Regs.AQSFRC.bit.ACTSFA = 1; //  What to do when One-Time Software Forced Event is invoked
+			//	00 Does nothing (action disabled)
+			//	01 Clear (low)
+			//	10 Set (high)
+			//	11 Toggle
+		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+
+		asm(" EALLOW");						// Enable EALLOW protected register access
+		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1; // Clear flag of DCAEVT2
+		asm(" EDIS");						// Disable EALLOW protected register access
+	}
+	// If DCAEVT2 generated this interruption
+	if (Comp2Regs.COMPSTS.bit.COMPSTS == 0) {
+		EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
+			//	00 Does nothing (action disabled)
+			//	01 Clear (low)
+			//	10 Set (high)
+			//	11 Toggle
+		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+
+		asm(" EALLOW");						// Enable EALLOW protected register access
+		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1; // Clear flag of DCAEVT1
+		asm(" EDIS");						// Disable EALLOW protected register access
+	}
+
+//	else {
+//		EPwm1Regs.AQSFRC.bit.ACTSFA = 0; // Clear EPwm1 for security reasons
+//		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+//	}
+
+	asm(" EALLOW");	// Enable EALLOW protected register access
+	EPwm1Regs.TZCLR.bit.INT = 1;
+	asm(" EDIS");						// Disable EALLOW protected register access
+
+
+
 
 // Next two lines for debug only - remove after inserting your ISR
-	asm (" ESTOP0");							// Emulator Halt instruction
-	while(1);
+//	asm (" ESTOP0");							// Emulator Halt instruction
+
+	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
 
 //---------------------------------------------------------------------
