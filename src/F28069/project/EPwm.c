@@ -45,8 +45,8 @@ void InitEPwm(void)
 //	EPwm1Regs.TBCTR = 0x0000;				// Clear timer counter
 //	EPwm1Regs.TBPRD = PWM_HALF_PERIOD;		// Set timer period
 //	EPwm1Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase
-
-	// 2. Compare Module --> We don't need this module set for this example
+//
+////	 2. Compare Module --> We don't need this module set for this example
 //	EPwm1Regs.CMPA.half.CMPA = PWM_DUTY_CYCLE;	// Set PWM duty cycle
 //
 //	EPwm1Regs.CMPCTL.all = 0x0002;			// Compare control register
@@ -61,7 +61,7 @@ void InitEPwm(void)
 //// bit 1-0       10:     LOADAMODE, 10 = load on zero or PRD match
 //
 //	// 3. Action-Qualifier Module
-//	EPwm1Regs.AQCTLA.all = 0x0060;		// Action-qualifier control register A
+//	EPwm1Regs.AQCTLA.all = 0x0000;//0x0060;		// Action-qualifier control register A
 //// bit 15-12     0000:   reserved
 //// bit 11-10     00:     CBD, 00 = do nothing
 //// bit 9-8       00:     CBU, 00 = do nothing
@@ -69,7 +69,7 @@ void InitEPwm(void)
 //// bit 5-4       10:     CAU, 10 = set
 //// bit 3-2       00:     PRD, 00 = do nothing
 //// bit 1-0       00:     ZRO, 00 = do nothing
-
+//
 //	EPwm1Regs.AQCTLB.all = 0x0000;		// Action-qualifier control register B
 //// bit 15-12     0000:   reserved
 //// bit 11-10     00:     CBD, 00 = do nothing
@@ -93,12 +93,12 @@ void InitEPwm(void)
 //// bit 1-0       00:     CSFA, 00 = forcing disabled
 
 	// 4. Deadband
-	EPwm1Regs.DBCTL.bit.OUT_MODE = 0;	// Deadband disabled
-//	EPwm1Regs.DBCTL.bit.IN_MODE = 00;   // Select EpwmA as input for Rise and Falling Edges
-//	EPwm1Regs.DBCTL.bit.POLSEL = 10;
-//	EPwm1Regs.DBCTL.bit.HALFCYCLE = 0;
-//	EPwm1Regs.DBRED = 2;	// Each clock cycle lasts 1/60MHz = 16,66666 ns. We'll need different dead bands in each converter
-//	EPwm1Regs.DBFED = 2;
+	EPwm1Regs.DBCTL.bit.OUT_MODE = 3; // Deadband disabled until we manage to make it work
+	EPwm1Regs.DBCTL.bit.IN_MODE = 0;   // Select EpwmA as input for Rise and Falling Edges
+	EPwm1Regs.DBCTL.bit.POLSEL = 2;
+	EPwm1Regs.DBCTL.bit.HALFCYCLE = 0;
+	EPwm1Regs.DBRED = 2;	// Each clock cycle lasts 1/60MHz = 16,66666 ns. We'll need different dead bands in each converter
+	EPwm1Regs.DBFED = 2;
 
 
 	// 5. PWM Chopper Module
@@ -138,7 +138,7 @@ void InitEPwm(void)
 //				EPwm1Regs.TZSEL.bit.DCAEVT1 = 0;
 						// 1 Disable DCAEVT2 as a CBC trip source event for this ePWM module
 
-				EPwm1Regs.TZCTL.bit.DCAEVT1 = 2;//1; // When a trip event occurs the following action is taken on output EPwm1A
+				EPwm1Regs.TZCTL.bit.DCAEVT1 = 2; // When a trip event occurs the following action is taken on output EPwm1A
 						//0 || 	00 High-impedance (EPWMxA = High-impedance state)
 						//	1 || 01 Force EPWMxA to a high state.
 						//	2 || 10 Force EPWMxA to a low state.
@@ -177,7 +177,8 @@ void InitEPwm(void)
 //				EPwm1Regs.TZSEL.bit.DCAEVT1 = 0;
 						// 1 Enable DCBEVT2 as a CBC trip source event for this ePWM module
 
-//				EPwm1Regs.TZCTL.bit.DCAEVT2 = 1; // When a trip event occurs the following action is taken on output EPwmxA
+				EPwm1Regs.TZCTL.bit.DCAEVT2 = 3; // When a trip event occurs the following action is taken on output EPwmxA
+				//Commented because it introduces noise in the signal when activated
 						//0 || 00 High-impedance (EPWMxB = High-impedance state)
 						//	1 || 01 Force EPWMxA to a high state.
 						//	2 || 10 Force EPWMxA to a low state.

@@ -8,7 +8,6 @@
 
 #include "Lab.h"						// Main include file
 
-
 //---------------------------------------------------------------------
 interrupt void INT13_ISR(void)					// 0x000D1A  INT13 (CPU Timer1)
 {
@@ -260,12 +259,19 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 	while(1);
 }
 
+// EPWM1 Global Variable
+short int lastPos = 2;
+	// 1 High
+	// 0 Low
+	// 2 First time
+
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
 
 //		// If DCAEVT1 generated this interruption
-	if (Comp1Regs.COMPSTS.bit.COMPSTS == 1) {
+	if (Comp1Regs.COMPSTS.bit.COMPSTS == 1 && (lastPos == 0 || lastPos == 2)) {
+
 		EPwm1Regs.AQSFRC.bit.ACTSFA = 1; //  What to do when One-Time Software Forced Event is invoked
 			//	00 Does nothing (action disabled)
 			//	01 Clear (low)
@@ -273,12 +279,10 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 			//	11 Toggle
 		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
 
-		asm(" EALLOW");						// Enable EALLOW protected register access
-		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1; // Clear flag of DCAEVT2
-		asm(" EDIS");						// Disable EALLOW protected register access
+		lastPos = 1;
 	}
 	// If DCAEVT2 generated this interruption
-	if (Comp2Regs.COMPSTS.bit.COMPSTS == 0) {
+	if (Comp2Regs.COMPSTS.bit.COMPSTS == 0 &&  (lastPos == 1 || lastPos == 2)) {
 		EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
 			//	00 Does nothing (action disabled)
 			//	01 Clear (low)
@@ -286,9 +290,7 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 			//	11 Toggle
 		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
 
-		asm(" EALLOW");						// Enable EALLOW protected register access
-		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1; // Clear flag of DCAEVT1
-		asm(" EDIS");						// Disable EALLOW protected register access
+		lastPos = 0;
 	}
 
 //	else {
@@ -297,14 +299,11 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 //	}
 
 	asm(" EALLOW");	// Enable EALLOW protected register access
+	EPwm1Regs.TZCLR.bit.DCAEVT1 = 1; // Clear flag of DCAEVT1
+	EPwm1Regs.TZCLR.bit.DCAEVT2 = 1; // Clear flag of DCAEVT2
 	EPwm1Regs.TZCLR.bit.INT = 1;
 	asm(" EDIS");						// Disable EALLOW protected register access
 
-
-
-
-// Next two lines for debug only - remove after inserting your ISR
-//	asm (" ESTOP0");							// Emulator Halt instruction
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
