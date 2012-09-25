@@ -11,6 +11,7 @@
 #ifndef LAB_H
 #define LAB_H
 
+extern int D;
 
 //---------------------------------------------------------------------------
 // Include Standard C Language Header Files

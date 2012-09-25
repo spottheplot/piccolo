@@ -10,3 +10,17 @@ We can control the buck converter through the Connector 2 with the following sig
 	V5, V6, V7 --> They will control the load by connecting several resistors in parallel.
 	
 We will have 12V input voltage and 5V output voltage.
+
+During the developement of this example, our Piccolo F28027 stopped working and i had to continue the developement in a new Piccolo F28069.
+
+The main problem of controlling the converter with a current hysteresis band is that we want to modify the PWM signals asynchronously.
+
+The PWM output is generated in the (Action Qualifier) AQ Submodule of the EPwm module. Before we worked with a fixed frequency so we generated several synchronous signals when the clock reached certain values (Period, Zero, CMPA or CMPB) to control the duty cycle. With this kind of control we had to use the internal comparators of the Piccolo (which are asynchronous indeed) and the only EPwm submodule that could affect the PWM signal was the (Trip Zone) TZ submodule. However now we were facing a new problem. The TZ submodule only affects the PWM signal as long as we are in a trip zone (defined by setting a band with a comparator) when we leave that trip zone the PWM value returns to its previous state. It can be considered as the TZ overwrites the PWM output, but doesnt change the PWM signal generation value in the AQ submodule.
+In this way, when we reached the upper band of the hysteresis cycle, the TZ submodule turned the PWM off and the current began to decrease, but as soon as it abandoned the "trip zone" (it came back to the hysteresis band) it turned on again.
+
+What we have had to do until we find a better way to accomplish this, is generating an interrupt when the upper comparator output changes. In this interrupt we change the PWM generation to low in the AQ submodule and keep in that way until the lower band comparator changes its output. Then we generate a new interrupt so we turn on the PWM signal. 
+
+However this is a synchronous method and takes several clock cycles to change the PWM signal, so we combine TZ and AQ submodules to overwrite asynchronously the PWM while we change its generation by the interrupt synchronously. This introduces to several problems as the Deadband submodulo not working properly.
+
+Once reached this point the new problem was the power on of the buck converter. In our case we needed to power off the PWM so one capacitor could charge up to allow switching it on afterwards.
+

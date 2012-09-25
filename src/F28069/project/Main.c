@@ -30,17 +30,48 @@ void main(void)
 	InitAdc();							// Initialize the ADC (FILE: Adc.c)
 	InitEPwm();							// Initialize the EPwm (FILE: EPwm.c) 
 
+// Variable Initialization
+	int D = 1; // While D = 1, the current hasnt reached the hysteresis cycle
+	int i = 0;
+
 //--- Enable global interrupts
-	asm(" CLRC INTM, DBGM");			// Enable global interrupts and realtime debug
+		// Enable global interrupts and realtime debug
+	asm("DBGM");
 
-//--- Main Loop
-	while(1)							// endless loop - wait for an interrupt
-	{
-		asm(" NOP");
-	}
+	asm(" CLRC INTM");
 
+	 //--- Main Loop
+	 	while(D)							// endless loop - wait for an interrupt
+	 	{
+	 		i ++;
+	 		if (i == 600) {
+	 			EPwm1Regs.AQSFRC.bit.ACTSFA = 1; //  What to do when One-Time Software Forced Event is invoked
+	 						//	00 Does nothing (action disabled)
+	 						//	01 Clear (low)
+	 						//	10 Set (high)
+	 						//	11 Toggle
+	 			EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+
+	 			EPwm1Regs.AQSFRC.bit.ACTSFB = 2; //  What to do when One-Time Software Forced Event is invoked
+	 						//	00 Does nothing (action disabled)
+	 						//	01 Clear (low)
+	 						//	10 Set (high)
+	 						//	11 Toggle
+	 			EPwm1Regs.AQSFRC.bit.OTSFB = 1; // Invoke One-Time Software Forced Event on Output A
+
+	 			for (i = 0 ; i < 100; i++) {
+	 						asm("NOP");
+	 					}
+	 			i = 0;
+	 		}
+	 	}
+
+	 //--- Main Loop
+	 	while(1)							// endless loop - wait for an interrupt
+	 	{
+	 		asm(" NOP");
+	 	}
 
 } //end of main()
-
 
 /*** end of file *****************************************************/

@@ -265,6 +265,8 @@ short int lastPos = 2;
 	// 0 Low
 	// 2 First time
 
+int D;
+
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
@@ -278,6 +280,8 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 			//	10 Set (high)
 			//	11 Toggle
 		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+
+		D = 0; // D == 1 while when he have started but the current hasn't reached the hyteresis cycle values
 
 		lastPos = 1;
 	}
