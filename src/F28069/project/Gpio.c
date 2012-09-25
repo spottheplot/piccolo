@@ -123,6 +123,15 @@ void InitGpio(void)
 
 	GpioCtrlRegs.GPADIR.bit.GPIO18 = 1;			// GPIO18 is an output (used for test - pin toggle)
 
+	GpioCtrlRegs.GPADIR.bit.GPIO2 = 1;
+	GpioCtrlRegs.GPADIR.bit.GPIO3 = 1;
+	GpioCtrlRegs.GPADIR.bit.GPIO4 = 1;
+
+	GpioDataRegs.GPASET.bit.GPIO2 = 0;
+	GpioDataRegs.GPASET.bit.GPIO3 = 0;
+	GpioDataRegs.GPASET.bit.GPIO4 = 1;
+
+
 //--- Finish up
 	asm(" EDIS");								// Disable EALLOW protected register access
 

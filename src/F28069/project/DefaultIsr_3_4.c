@@ -270,7 +270,6 @@ int D;
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
-
 //		// If DCAEVT1 generated this interruption
 	if (Comp1Regs.COMPSTS.bit.COMPSTS == 1 && (lastPos == 0 || lastPos == 2)) {
 

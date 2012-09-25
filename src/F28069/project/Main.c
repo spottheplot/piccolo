@@ -31,6 +31,7 @@ void main(void)
 	InitEPwm();							// Initialize the EPwm (FILE: EPwm.c) 
 
 // Variable Initialization
+	asm (" ESTOP0");							// Emulator Halt instruction
 	int D = 1; // While D = 1, the current hasnt reached the hysteresis cycle
 	int i = 0;
 
@@ -45,6 +46,7 @@ void main(void)
 	 	{
 	 		i ++;
 	 		if (i == 600) {
+
 	 			EPwm1Regs.AQSFRC.bit.ACTSFA = 1; //  What to do when One-Time Software Forced Event is invoked
 	 						//	00 Does nothing (action disabled)
 	 						//	01 Clear (low)
@@ -58,10 +60,6 @@ void main(void)
 	 						//	10 Set (high)
 	 						//	11 Toggle
 	 			EPwm1Regs.AQSFRC.bit.OTSFB = 1; // Invoke One-Time Software Forced Event on Output A
-
-	 			for (i = 0 ; i < 100; i++) {
-	 						asm("NOP");
-	 					}
 	 			i = 0;
 	 		}
 	 	}
@@ -69,6 +67,7 @@ void main(void)
 	 //--- Main Loop
 	 	while(1)							// endless loop - wait for an interrupt
 	 	{
+	 		asm (" ESTOP0");							// Emulator Halt instruction
 	 		asm(" NOP");
 	 	}
 
