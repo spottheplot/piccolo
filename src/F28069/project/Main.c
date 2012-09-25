@@ -11,6 +11,7 @@
 //--- Global Variables
 Uint16 AdcBuf[ADC_BUF_LEN];					// ADC buffer allocation
 Uint16 DEBUG_TOGGLE = 1;					// Used for realtime mode investigation test
+int D = 1;  // While D = 1, the current hasnt reached the hysteresis cycle
 
 
 /**********************************************************************
@@ -18,6 +19,7 @@ Uint16 DEBUG_TOGGLE = 1;					// Used for realtime mode investigation test
 *
 * Description: Main function for C28x workshop labs
 **********************************************************************/
+
 void main(void)
 {
 //--- CPU Initialization
@@ -32,8 +34,8 @@ void main(void)
 
 // Variable Initialization
 	asm (" ESTOP0");							// Emulator Halt instruction
-	int D = 1; // While D = 1, the current hasnt reached the hysteresis cycle
 	int i = 0;
+
 
 //--- Enable global interrupts
 		// Enable global interrupts and realtime debug
@@ -67,7 +69,6 @@ void main(void)
 	 //--- Main Loop
 	 	while(1)							// endless loop - wait for an interrupt
 	 	{
-	 		asm (" ESTOP0");							// Emulator Halt instruction
 	 		asm(" NOP");
 	 	}
 

@@ -265,8 +265,6 @@ short int lastPos = 2;
 	// 0 Low
 	// 2 First time
 
-int D;
-
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
