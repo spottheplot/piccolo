@@ -43,6 +43,26 @@ void InitAdc(void)
 
 	DelayUs(1000);						// Wait 1 ms after power-up before using the ADC
 
+	//--- SOC0 configuration
+		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN0 = 0;		// SOC0 in single sample mode (vs. simultaneous mode)
+
+		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 7;			// Trigger using ePWM2-ADCSOCA
+		AdcRegs.ADCSOC0CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+		AdcRegs.ADCSOC0CTL.bit.ACQPS = 6;			// Acquisition window set to (6+1)=7 cycles
+
+		AdcRegs.ADCINTSOCSEL1.bit.SOC0 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+
+		AdcRegs.SOCPRICTL.bit.SOCPRIORITY = 0;		// All SOCs handled in round-robin mode
+
+	//--- ADCINT1 configuration
+		AdcRegs.INTSEL1N2.bit.INT1CONT = 1;			// ADCINT1 pulses regardless of ADCINT1 flag state
+		AdcRegs.INTSEL1N2.bit.INT1E = 1;			// Enable ADCINT1
+		AdcRegs.INTSEL1N2.bit.INT1SEL = 0;			// EOC0 triggers ADCINT1
+
+	//--- Enable the ADC interrupt
+		PieCtrlRegs.PIEIER1.bit.INTx1 = 1;			// Enable ADCINT1 in PIE group 1
+		IER |= 0x0001;								// Enable INT1 in IER to enable PIE group
+
 	//--- Comparator 1 Configuration --> If (input + > input -) --> CompOut = 1
 														// If (input + < input -) --> CompOut = 0
 		Comp1Regs.COMPCTL.bit.COMPDACEN = 1; // Enable Comparator 1
@@ -62,7 +82,7 @@ void InitAdc(void)
 																			// 0 Input - is generated internally via DAC and compared to an input  + which is an external pin
 		Comp2Regs.COMPCTL.bit.SYNCSEL = 0; //Asynchronous Comp1 Output
 		Comp2Regs.COMPCTL.bit.QUALSEL =  0; // Don't Care
-		Comp2Regs.DACVAL.bit.DACVAL = 386; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
+		Comp2Regs.DACVAL.bit.DACVAL = 400; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
 
 		 AdcRegs.ADCCTL1.bit.ADCBGPWD = 1; // It's already been enabled, but it's necessary to enable it for the comparator to work
 

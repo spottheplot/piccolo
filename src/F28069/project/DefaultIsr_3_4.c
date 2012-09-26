@@ -165,22 +165,35 @@ interrupt void USER12_ISR(void)					// 0x000D3E  USER12 (Software interrupt #12)
 //---------------------------------------------------------------------
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
-static Uint16 *AdcBufPtr = AdcBuf;				// Pointer to buffer
-static volatile Uint16 GPIO34_count = 0;		// Counter for pin toggle
-
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 
 //--- Manage the ADC registers     
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
-
-//--- Read the ADC result
-	*AdcBufPtr++ = 	AdcResult.ADCRESULT0;     	// Read the result
-
-//--- Brute-force the circular buffer
-	if( AdcBufPtr == (AdcBuf + ADC_BUF_LEN) )
-	{	
-		AdcBufPtr = AdcBuf;						// Rewind the pointer to beginning
+	switch (state) {
+		case 0:
+			step ++;
+			Comp1Regs.DACVAL.bit.DACVAL = step;
+			if (step == 600)
+				state = 1;
+			break;
+		case 1:
+			plain ++;
+			if (plain == 50)
+				state = 2;
+			break;
+		case 2:
+			step --;
+			Comp1Regs.DACVAL.bit.DACVAL = step;
+			if (step == 440)
+				state = 3;
+			break;
+		case 3:
+			plain --;
+			if (plain == 0)
+			state = 0;
+			break;
 	}
+
 
 //--- Example: Toggle GPIO18 so we can read it with the ADC ***/
 	if(DEBUG_TOGGLE == 1)
@@ -188,14 +201,6 @@ static volatile Uint16 GPIO34_count = 0;		// Counter for pin toggle
 		GpioDataRegs.GPATOGGLE.bit.GPIO18 = 1;		// Toggle the pin
 	}
 
-//--- Example: Toggle GPIO34 at a 0.5 sec rate (connected to the LED on the ControlCARD).
-//             (1/50000 sec/sample)*(1 samples/int)*(x interrupts/toggle) = (0.5 sec/toggle)
-//             ==> x = 25000
-	if(GPIO34_count++ > 25000)					// Toggle slowly to see the LED blink
-	{
-		GpioDataRegs.GPBTOGGLE.bit.GPIO34 = 1;	// Toggle the pin
-		GPIO34_count = 0;						// Reset the counter
-	}
 }
 
 //---------------------------------------------------------------------

@@ -14,6 +14,9 @@
 Uint16 AdcBuf[ADC_BUF_LEN];					// ADC buffer allocation
 Uint16 DEBUG_TOGGLE = 1;					// Used for realtime mode investigation test
 int D = 1;  // While D = 1, the current hasnt reached the hysteresis cycle
+int step = 440;
+int state = 0;
+int plain = 0;
 
 
 /**********************************************************************
