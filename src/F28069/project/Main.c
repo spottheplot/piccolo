@@ -2,8 +2,10 @@
 * File: Main_3.c -- File for Lab 3
 * Devices: TMS320F2806x
 * Author: Technical Training Organization (TTO), Texas Instruments
+* 				Juan Herrero Macías, Universidad Politécnica de Madrid
 * History:
 *   10/14/11 - original
+*   13/09/2012 - modifications for piccolo project
 **********************************************************************/
 
 #include "Lab.h"						// Main include file

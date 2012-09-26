@@ -2,10 +2,12 @@
 * File: lab.h
 * Device: TMS320F2806x
 * Author: Technical Training Organization (TTO), Texas Instruments
+* 				Juan Herrero Macías, Universidad Politécnica de Madrid
 * Description: Include file for C28x workshop labs.  Include this
 *   file in all C-source files.
 * History:
 *   10/14/11 - original
+*   13/09/2012 - modifications for piccolo project
 **********************************************************************/
 
 #ifndef LAB_H
