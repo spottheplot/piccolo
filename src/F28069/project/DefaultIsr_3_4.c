@@ -169,38 +169,12 @@ interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 
 //--- Manage the ADC registers     
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
-	switch (state) {
-		case 0:
-			step ++;
-			Comp1Regs.DACVAL.bit.DACVAL = step;
-			if (step == 600)
-				state = 1;
-			break;
-		case 1:
-			plain ++;
-			if (plain == 50)
-				state = 2;
-			break;
-		case 2:
-			step --;
-			Comp1Regs.DACVAL.bit.DACVAL = step;
-			if (step == 440)
-				state = 3;
-			break;
-		case 3:
-			plain --;
-			if (plain == 0)
-			state = 0;
-			break;
-	}
 
-
-//--- Example: Toggle GPIO18 so we can read it with the ADC ***/
-	if(DEBUG_TOGGLE == 1)
-	{
-		GpioDataRegs.GPATOGGLE.bit.GPIO18 = 1;		// Toggle the pin
-	}
-
+//--- Modify Upper Hysteresis Band
+	step ++;
+	Comp1Regs.DACVAL.bit.DACVAL = sinValues[step];
+	if (step == SIN_DEFINITION)
+		step = 0;
 }
 
 //---------------------------------------------------------------------

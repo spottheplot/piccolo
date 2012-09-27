@@ -44,7 +44,7 @@ void InitEPwm(void)
 	// bit 1-0       11:     CTRMODE, 11 = timer stopped (disabled)
 
 		EPwm2Regs.TBCTR = 0x0000;				// Clear timer counter
-		EPwm2Regs.TBPRD = ADC_SAMPLE_PERIOD;	// Set timer period
+		EPwm2Regs.TBPRD = ENVELOPE_SAMPLE_PERIOD;	// Set timer period
 		EPwm2Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase
 
 		EPwm2Regs.ETPS.all = 0x0100;			// Configure SOCA

@@ -9,15 +9,13 @@
 **********************************************************************/
 
 #include "Lab.h"						// Main include file
+#include "math.h"
 
-//--- Global Variables
-Uint16 AdcBuf[ADC_BUF_LEN];					// ADC buffer allocation
+//--- Global Variable
 Uint16 DEBUG_TOGGLE = 1;					// Used for realtime mode investigation test
 int D = 1;  // While D = 1, the current hasnt reached the hysteresis cycle
-int step = 440;
-int state = 0;
-int plain = 0;
-
+int step = 0;
+int sinValues[SIN_DEFINITION];
 
 /**********************************************************************
 * Function: main()
@@ -37,10 +35,15 @@ void main(void)
 	InitAdc();							// Initialize the ADC (FILE: Adc.c)
 	InitEPwm();							// Initialize the EPwm (FILE: EPwm.c) 
 
+	int d;
+	for (d = 0; d < SIN_DEFINITION; d++) {
+		sinValues[d] = (int)(fabs(sin(d * 180.f / SIN_DEFINITION * 2 * PI / 360)) * SIN_AMPLITUDE) + LOWER_HYSTERESIS_BAND;
+	}
+
+
 // Variable Initialization
 	asm (" ESTOP0");							// Emulator Halt instruction
 	int i = 0;
-
 
 //--- Enable global interrupts
 		// Enable global interrupts and realtime debug
@@ -53,7 +56,6 @@ void main(void)
 	 	{
 	 		i ++;
 	 		if (i == 600) {
-
 	 			EPwm1Regs.AQSFRC.bit.ACTSFA = 1; //  What to do when One-Time Software Forced Event is invoked
 	 						//	00 Does nothing (action disabled)
 	 						//	01 Clear (low)

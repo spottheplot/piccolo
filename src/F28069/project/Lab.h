@@ -13,11 +13,6 @@
 #ifndef LAB_H
 #define LAB_H
 
-extern int D;
-extern int step;
-extern int state;
-extern int plain;
-
 //---------------------------------------------------------------------------
 // Include Standard C Language Header Files
 //
@@ -34,11 +29,20 @@ extern int plain;
 //---------------------------------------------------------------------------
 // Constant Definitions
 //
-#define ADC_BUF_LEN			50				// ADC buffer length
-#define ADC_SAMPLE_PERIOD	10000		// 1599 = 50 kHz sampling w/ 80 MHz SYSCLKOUT
-#define PWM_HALF_PERIOD		20000			// period/2 for 2 kHz symmetric PWM w/ 80 MHz SYSCLKOUT
-#define PWM_DUTY_CYCLE		15000			// 25% duty cycle
 
+#define ENVELOPE_SAMPLE_PERIOD	2666		// 1599 = 50 kHz sampling w/ 80 MHz SYSCLKOUT
+
+#define SIN_DEFINITION 300
+#define SIN_AMPLITUDE 200
+#define PI 3.14159f
+#define LOWER_HYSTERESIS_BAND 400
+
+extern int D;
+extern int sinValues[SIN_DEFINITION];
+
+extern int step;
+extern int state;
+extern int plain;
 
 //---------------------------------------------------------------------------
 // Function Prototypes
@@ -64,8 +68,6 @@ extern Uint16 secureRamFuncs_runstart;
 
 //---------------------------------------------------------------------------
 // Global Variables References
-//
-extern Uint16 AdcBuf[ADC_BUF_LEN];
 extern Uint16 DEBUG_TOGGLE;
 extern const struct PIE_VECT_TABLE PieVectTableInit;	// PieVectTableInit is always extern
 
