@@ -29,13 +29,15 @@
 //---------------------------------------------------------------------------
 // Constant Definitions
 //
+// To calculate the period of the sin envelope that the current will follow
+// We need to update the DAC value 300 times (steps) to complete a sine. We want the sine to have a frequency of 100 Hz
+// So we need to call to an interruption 300 * 100 = 30 kHz
+#define ENVELOPE_SAMPLE_PERIOD	2666		// 2666 = 30 kHz sampling w/ 80 MHz SYSCLKOUT
 
-#define ENVELOPE_SAMPLE_PERIOD	2666		// 1599 = 50 kHz sampling w/ 80 MHz SYSCLKOUT
-
-#define SIN_DEFINITION 300
-#define SIN_AMPLITUDE 200
+#define SIN_DEFINITION 300 // Number of steps in which a sine wave is divided
+#define SIN_AMPLITUDE 200 // The difference between the Peak of the sine and the lower hysteresis band. This values are refered to the DAC value of the internal comparator
 #define PI 3.14159f
-#define LOWER_HYSTERESIS_BAND 400
+#define LOWER_HYSTERESIS_BAND 400 // Sine offset (DAC value at which the sine is zero)
 
 extern int D;
 extern int sinValues[SIN_DEFINITION];

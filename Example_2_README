@@ -24,3 +24,5 @@ However this is a synchronous method and takes several clock cycles to change th
 
 Once reached this point the new problem was the power on of the buck converter. In our case we needed to power off the PWM so one capacitor could charge up to allow switching on afterwards. We have created a initial loop called the start up loop in which we force the PWM off each 600 cycles. Once we reach the upper band we switch to the main loop and work suposing we have reached steady state.
 
+In the last commits we have added the capability of updating the upper hysteresis band at real time so the current peaks follow a determined shape. A trapezoid and a positive sine envelopes have been added.
+
