@@ -1,0 +1,5 @@
+In this folder we are going to develope the code for controlling a forward converter (A schematic very similar to the one i'm using is provided in /doc folder)
+
+The first 2 examples of code are going to be an adaptation of the examples 1 and 2 of the buck developement. 
+
+	- example1 --> We are going to control the forward converter with a fixed frequency of 90kHz and duty cycle of 0.3
