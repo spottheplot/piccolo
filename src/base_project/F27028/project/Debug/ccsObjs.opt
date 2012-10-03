@@ -1,1 +1,0 @@
-"./Watchdog.obj" "./SysCtrl.obj" "./PieVect.obj" "./PieCtrl.obj" "./Main_3.obj" "./Gpio.obj" "./EPwm.obj" "./DelayUs.obj" "./DefaultIsr_3_4.obj" "./DSP2802x_GlobalVariableDefs.obj" "./CodeStartBranch.obj" "./Adc.obj" -l"rts2800_ml.lib" "../DSP2802x_Headers_nonBIOS.cmd" "../Lab_2_3.cmd" 
