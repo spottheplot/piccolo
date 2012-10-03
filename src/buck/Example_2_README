@@ -1,0 +1,28 @@
+In this example we will set the code necessary for using a 1 phase buck converter controlled by a current hysteresis band. 
+
+We will calculate the current rip in the coil and set 2 bands in the piccolo's comparator. Depending on the load and the current average we want to determine Vout, we will set and upper and a lower band. When the current reaches the upper band, the PWM will turn off and when the current reaches the lower band the PWM will turn on.
+
+We will also need to calculate the current gain through the current sensor and the controller, so we can determine the bands.
+
+We can control the buck converter through the Connector 2 with the following signals.
+	V1, V2 --> They will control the PWM of one of the two phases of the buck converter.
+	V3, V4 --> They control the second phase. In this example they will be connected to ground as we won't be using it.
+	V5, V6, V7 --> They will control the load by connecting several resistors in parallel.
+	
+We will have 12V input voltage and 5V output voltage.
+
+During the developement of this example, our Piccolo F28027 stopped working and i had to continue the developement in a new Piccolo F28069.
+
+The main problem of controlling the converter with a current hysteresis band is that we want to modify the PWM signals asynchronously.
+
+The PWM output is generated in the (Action Qualifier) AQ Submodule of the EPwm module. In Example 1 we worked with a fixed frequency so we could generate several synchronous signals when the clock reached certain values (Period, Zero, CMPA or CMPB) to control the duty cycle. With this kind of control we had to use the internal comparators of the Piccolo (which are asynchronous indeed) to generate a pulse and send it to the (Trip Zone) TZ submodule). However now we were facing a new problem. The TZ submodule only affects the PWM signal as long as we are in a trip zone (defined by setting a band with a comparator) when we leave that trip zone the PWM value returns to its previous state. It can be considered the TZ overwrites the PWM output, but doesnt change the PWM signal generation value in the AQ submodule.
+In this way, when we reached the upper band of the hysteresis cycle, the TZ submodule turned the PWM off and the current began to decrease, but as soon as it abandoned the "trip zone" (it came back to the hysteresis band) it turned on again.
+
+What we have had to do until we find a better way to accomplish this, is generating an interrupt when the upper comparator output changes. In this interrupt we change the PWM generation to low in the AQ submodule and keep it in that way until the lower band comparator changes its output. Then we generate a new interrupt so we turn on the PWM signal. 
+
+However this is a synchronous method and takes several clock cycles to change the PWM signal, so we combine TZ and AQ submodules to overwrite asynchronously the PWM while we change its generation by the interrupt synchronously. This introduces us to several problems as the Deadband submodule not working properly in falling edges.
+
+Once reached this point the new problem was the power on of the buck converter. In our case we needed to power off the PWM so one capacitor could charge up to allow switching on afterwards. We have created a initial loop called the start up loop in which we force the PWM off each 600 cycles. Once we reach the upper band we switch to the main loop and work suposing we have reached steady state.
+
+In the last commits we have added the capability of updating the upper hysteresis band at real time so the current peaks follow a determined shape. A trapezoid and a positive sine envelopes have been added.
+
