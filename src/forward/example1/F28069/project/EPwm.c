@@ -93,22 +93,16 @@ void InitEPwm(void)
 // bit 1-0       00:     CSFA, 00 = forcing disabled
 
 	// 4. Deadband
-	EPwm1Regs.DBCTL.bit.OUT_MODE = 3; // Deadband disabled until we manage to make it work
-	EPwm1Regs.DBCTL.bit.IN_MODE = 0;   // Select EpwmA as input for Rise and Falling Edges
-	EPwm1Regs.DBCTL.bit.POLSEL = 2;
-	EPwm1Regs.DBCTL.bit.HALFCYCLE = 0;
-	EPwm1Regs.DBRED = 2;	// Each clock cycle lasts 1/60MHz = 16,66666 ns. We'll need different dead bands in each converter
-	EPwm1Regs.DBFED = 2;
-
+	EPwm1Regs.DBCTL.bit.OUT_MODE = 3; // Deadband disabled as we do no longer need it in the forward converter (we have to control just one switch)
 
 	// 5. PWM Chopper Module
 	EPwm1Regs.PCCTL.bit.CHPEN = 0;		// PWM chopper unit disabled
 
 	// 6. Trip Zone and DC Compare Modules
-		EPwm1Regs.TZDCSEL.all = 0x0000;		// All trip zone and DC compare actions disabled
+	EPwm1Regs.TZDCSEL.all = 0x0000;		// All trip zone and DC compare actions disabled
 
 	// 7. Set the timer
-	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;	// Enable the timer in count up/down mode
+	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;	// Enable the timer in count up mode
 
 //---------------------------------------------------------------------
 //--- Enable the clocks to the ePWM module.                   
