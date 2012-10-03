@@ -61,13 +61,13 @@ void InitEPwm(void)
 // bit 1-0       10:     LOADAMODE, 10 = load on zero or PRD match
 
 	// 3. Action-Qualifier Module
-	EPwm1Regs.AQCTLA.all = 0x0064;//0x0060;		// Action-qualifier control register A
+	EPwm1Regs.AQCTLA.all = 0x0018;		// Action-qualifier control register A
 // bit 15-12     0000:   reserved
 // bit 11-10     00:     CBD, 00 = do nothing
 // bit 9-8       00:     CBU, 00 = do nothing
-// bit 7-6       01:     CAD, 01 = clear
-// bit 5-4       10:     CAU, 10 = set
-// bit 3-2       00:     PRD, 01 = clear
+// bit 7-6       01:     CAD, 00 = do nothing
+// bit 5-4       10:     CAU, 01 = clear
+// bit 3-2       00:     PRD, 10 = set
 // bit 1-0       00:     ZRO, 00 = do nothing
 
 //	EPwm1Regs.AQCTLB.all = 0x0000;		// Action-qualifier control register B

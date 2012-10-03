@@ -42,7 +42,7 @@ extern int D;
 
 // Duty cycle. The counter will go up each clock cycle. When it reaches PWM_DUTY_CYCLE, it will set PWM signal high.
 // It will remain high until the counter reaches PWM_PERIOD or PWM_HALF_PERIOD. Then the PWM signal and the counter will be reset to 0
-#define PWM_DUTY_CYCLE	622	//30% duty cycle --> 388 for Asymmetric  PWM
+#define PWM_DUTY_CYCLE	266	//30% duty cycle --> 266 for Asymmetric  PWM
 
 
 
