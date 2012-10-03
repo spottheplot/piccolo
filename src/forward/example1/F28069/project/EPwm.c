@@ -93,7 +93,7 @@ void InitEPwm(void)
 // bit 1-0       00:     CSFA, 00 = forcing disabled
 
 	// 4. Deadband
-	EPwm1Regs.DBCTL.bit.OUT_MODE = 3; // Deadband disabled as we do no longer need it in the forward converter (we have to control just one switch)
+	EPwm1Regs.DBCTL.bit.OUT_MODE = 0; // Deadband disabled as we do no longer need it in the forward converter (we only have to control one switch)
 
 	// 5. PWM Chopper Module
 	EPwm1Regs.PCCTL.bit.CHPEN = 0;		// PWM chopper unit disabled
