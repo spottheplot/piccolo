@@ -37,40 +37,29 @@ void main(void)
 
 	int d;
 	for (d = 0; d < SIN_DEFINITION; d++) {
-		sinValues[d] = (int)(fabs(sin(d * 180.f / SIN_DEFINITION * 2 * PI / 360)) * SIN_AMPLITUDE) + LOWER_HYSTERESIS_BAND;
+		sinValues[d] = UPPER_HYSTERESIS_BAND;//(int)(fabs(sin(d * 180.f / SIN_DEFINITION * 2 * PI / 360)) * SIN_AMPLITUDE) + LOWER_HYSTERESIS_BAND;
 	}
 
 
 // Variable Initialization
-	asm (" ESTOP0");							// Emulator Halt instruction
-	int i = 0;
+	asm (" ESTOP0");							// Emulator Halt instruction¡
 
 //--- Enable global interrupts
 		// Enable global interrupts and realtime debug
-	asm("DBGM");
+	//asm("DBGM");
 
 	asm(" CLRC INTM");
+
+	EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
+			 						// 0 ||	00 Does nothing (action disabled)
+			 						// 1 ||	01 Clear (low)
+			 						// 2 ||	10 Set (high)
+			 						// 3 ||	11 Toggle
+	EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
 
 	 //--- Main Loop
 	 	while(D)							// endless loop - wait for an interrupt
 	 	{
-	 		i ++;
-	 		if (i == 600) {
-	 			EPwm1Regs.AQSFRC.bit.ACTSFA = 1; //  What to do when One-Time Software Forced Event is invoked
-	 						//	00 Does nothing (action disabled)
-	 						//	01 Clear (low)
-	 						//	10 Set (high)
-	 						//	11 Toggle
-	 			EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
-
-	 			EPwm1Regs.AQSFRC.bit.ACTSFB = 2; //  What to do when One-Time Software Forced Event is invoked
-	 						//	00 Does nothing (action disabled)
-	 						//	01 Clear (low)
-	 						//	10 Set (high)
-	 						//	11 Toggle
-	 			EPwm1Regs.AQSFRC.bit.OTSFB = 1; // Invoke One-Time Software Forced Event on Output A
-	 			i = 0;
-	 		}
 	 	}
 
 	 //--- Main Loop

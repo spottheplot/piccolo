@@ -167,14 +167,6 @@ interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 
-//--- Manage the ADC registers     
-	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
-
-//--- Modify Upper Hysteresis Band
-	step ++;
-	Comp1Regs.DACVAL.bit.DACVAL = sinValues[step];
-	if (step == SIN_DEFINITION)
-		step = 0;
 }
 
 //---------------------------------------------------------------------
@@ -252,6 +244,8 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 //		// If DCAEVT1 generated this interruption
 	if (Comp1Regs.COMPSTS.bit.COMPSTS == 1 && (lastPos == 0 || lastPos == 2)) {
 
+		GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
+
 		EPwm1Regs.AQSFRC.bit.ACTSFA = 1; //  What to do when One-Time Software Forced Event is invoked
 			//	00 Does nothing (action disabled)
 			//	01 Clear (low)
@@ -259,18 +253,20 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 			//	11 Toggle
 		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
 
-		D = 0; // D == 1 while when he have started but the current hasn't reached the hyteresis cycle values
-
+		D = 0; // D == 1 once he have started but the current hasn't reached the hyteresis cycle values
+		GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
 		lastPos = 1;
 	}
 	// If DCAEVT2 generated this interruption
 	if (Comp2Regs.COMPSTS.bit.COMPSTS == 0 &&  (lastPos == 1 || lastPos == 2)) {
+		GpioDataRegs.GPATOGGLE.bit.GPIO18 = 1;
 		EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
 			//	00 Does nothing (action disabled)
 			//	01 Clear (low)
 			//	10 Set (high)
 			//	11 Toggle
 		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+
 
 		lastPos = 0;
 	}
@@ -280,10 +276,12 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 //		EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
 //	}
 
+
 	asm(" EALLOW");	// Enable EALLOW protected register access
 	EPwm1Regs.TZCLR.bit.DCAEVT1 = 1; // Clear flag of DCAEVT1
 	EPwm1Regs.TZCLR.bit.DCAEVT2 = 1; // Clear flag of DCAEVT2
 	EPwm1Regs.TZCLR.bit.INT = 1;
+
 	asm(" EDIS");						// Disable EALLOW protected register access
 
 

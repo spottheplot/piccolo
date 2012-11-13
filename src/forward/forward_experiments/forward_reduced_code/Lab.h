@@ -38,6 +38,7 @@
 #define SIN_AMPLITUDE 200 // The difference between the Peak of the sine and the lower hysteresis band. This values are refered to the DAC value of the internal comparator
 #define PI 3.14159f
 #define LOWER_HYSTERESIS_BAND 400 // Sine offset (DAC value at which the sine is zero)
+#define UPPER_HYSTERESIS_BAND 500
 
 extern int D;
 extern int sinValues[SIN_DEFINITION];

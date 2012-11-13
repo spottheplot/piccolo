@@ -26,49 +26,6 @@ void InitEPwm(void)
 	SysCtrlRegs.PCLKCR0.bit.TBCLKSYNC = 0;
 	asm(" EDIS");						// Disable EALLOW protected register access
 
-
-	//---------------------------------------------------------------------
-	//--- Configure ePWM2 to trigger the ADC at a 50 kHz rate
-	//---------------------------------------------------------------------
-		EPwm2Regs.TBCTL.bit.CTRMODE = 0x3;		// Disable the timer
-
-		EPwm2Regs.TBCTL.all = 0xC033;			// Configure timer control register
-	// bit 15-14     11:     FREE/SOFT, 11 = ignore emulation suspend
-	// bit 13        0:      PHSDIR, 0 = count down after sync event
-	// bit 12-10     000:    CLKDIV, 000 => TBCLK = HSPCLK/1
-	// bit 9-7       000:    HSPCLKDIV, 000 => HSPCLK = SYSCLKOUT/1
-	// bit 6         0:      SWFSYNC, 0 = no software sync produced
-	// bit 5-4       11:     SYNCOSEL, 11 = sync-out disabled
-	// bit 3         0:      PRDLD, 0 = reload PRD on counter=0
-	// bit 2         0:      PHSEN, 0 = phase control disabled
-	// bit 1-0       11:     CTRMODE, 11 = timer stopped (disabled)
-
-		EPwm2Regs.TBCTR = 0x0000;				// Clear timer counter
-		EPwm2Regs.TBPRD = ENVELOPE_SAMPLE_PERIOD;	// Set timer period
-		EPwm2Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase
-
-		EPwm2Regs.ETPS.all = 0x0100;			// Configure SOCA
-	// bit 15-14     00:     EPWMxSOCB, read-only
-	// bit 13-12     00:     SOCBPRD, don't care
-	// bit 11-10     00:     EPWMxSOCA, read-only
-	// bit 9-8       01:     SOCAPRD, 01 = generate SOCA on first event
-	// bit 7-4       0000:   reserved
-	// bit 3-2       00:     INTCNT, don't care
-	// bit 1-0       00:     INTPRD, don't care
-
-		EPwm2Regs.ETSEL.all = 0x0A00;			// Enable SOCA to ADC
-	// bit 15        0:      SOCBEN, 0 = disable SOCB
-	// bit 14-12     000:    SOCBSEL, don't care
-	// bit 11        1:      SOCAEN, 1 = enable SOCA
-	// bit 10-8      010:    SOCASEL, 010 = SOCA on PRD event
-	// bit 7-4       0000:   reserved
-	// bit 3         0:      INTEN, 0 = disable interrupt
-	// bit 2-0       000:    INTSEL, don't care
-
-		EPwm2Regs.TBCTL.bit.CTRMODE = 0x0;		// Enable the timer in count up mode
-
-
-
 //---------------------------------------------------------------------
 //--- Configure ePWM1
 //---------------------------------------------------------------------
@@ -149,12 +106,12 @@ void InitEPwm(void)
 
 		// Clear EPwm1A when the input in the comparator 1 is higher than the reference (by generating DCAEVT1)
 				EPwm1Regs.DCTRIPSEL.bit.DCAHCOMPSEL = 8; // Select the source for the Digital Compare A High (DCAH) input --> Comp1Out = DCAH
-						//	0000 TZ1 input
-						//	0001 TZ2 input
-						//	0010 TZ3 input
-						//	1000 COMP1OUT input
-						//	1001 COMP2OUT input
-						// 1010 COMP3OUT input
+						//  0 || 0000 TZ1 input
+						//	1 || 0001 TZ2 input
+						//	2 || 0010 TZ3 input
+						//	8 || 1000 COMP1OUT input
+						//	9 || 1001 COMP2OUT input
+						// 10 || 1010 COMP3OUT input
 
 				// Once set the event signal creation, we want the Trip-Zone Submodule to catch the event and handle it
 				EPwm1Regs.TZDCSEL.bit.DCAEVT1 = 2;//1; //The event signal DCAEVT1 will be sent when Comp1Out goes high (DCAH High)
@@ -176,7 +133,7 @@ void InitEPwm(void)
 //				EPwm1Regs.TZSEL.bit.DCAEVT1 = 0;
 						// 1 Disable DCAEVT2 as a CBC trip source event for this ePWM module
 
-				EPwm1Regs.TZCTL.bit.DCAEVT1 = 2; // When a trip event occurs the following action is taken on output EPwm1A
+				EPwm1Regs.TZCTL.bit.DCAEVT1 = 3; // When a trip event occurs the following action is taken on output EPwm1A
 						//0 || 	00 High-impedance (EPWMxA = High-impedance state)
 						//	1 || 01 Force EPWMxA to a high state.
 						//	2 || 10 Force EPWMxA to a low state.

@@ -4,7 +4,7 @@
 <projectOptions>
 <deviceVariant value="TMS320C28XX.TMS320F28069.CONTROLSTICKF28069"/>
 <deviceEndianness value="little"/>
-<codegenToolVersion value="6.1.0"/>
+<codegenToolVersion value="6.0.2"/>
 <isElfFormat value="false"/>
 <connection value="common/targetdb/connections/TIXDS100usb_Connection.xml"/>
 <rts value="libc.a"/>
