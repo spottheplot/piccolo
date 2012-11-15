@@ -25,8 +25,8 @@ void InitGpio(void)
 	GpioCtrlRegs.GPADIR.all   = 0x00000000;		// All group A GPIO are inputs
 	GpioCtrlRegs.GPAPUD.all   = 0x00000FFF;		// Pullups enabled GPIO31-12, disabled GPIO11-0
 
-	GpioCtrlRegs.GPAMUX1.bit.GPIO0  = 1;		// 0=GPIO               1=EPWM1A     2=rsvd       3=rsvd
-	GpioCtrlRegs.GPAMUX1.bit.GPIO1  = 1;		// 0=GPIO               1=EPWM1B     2=rsvd       3=COMP1OUT
+	GpioCtrlRegs.GPAMUX1.bit.GPIO0  = 0;		// 0=GPIO               1=EPWM1A     2=rsvd       3=rsvd
+	GpioCtrlRegs.GPAMUX1.bit.GPIO1  = 3;		// 0=GPIO               1=EPWM1B     2=rsvd       3=COMP1OUT
 	GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 0;		// 0=GPIO               1=EPWM2A     2=rsvd       3=rsvd
 	GpioCtrlRegs.GPAMUX1.bit.GPIO3  = 3;		// 0=GPIO               1=EPWM2B     2=SPISOMIA   3=COMP2OUT
 	GpioCtrlRegs.GPAMUX1.bit.GPIO4  = 0;		// 0=GPIO               1=EPWM3A     2=rsvd       3=rsvd
@@ -122,12 +122,14 @@ void InitGpio(void)
 	GpioDataRegs.GPBSET.bit.GPIO34 = 1;			// GPIO34 pin is set to 1 (turn LED on)
 
 	GpioCtrlRegs.GPADIR.bit.GPIO18 = 1;			// GPIO18 is an output (used for test - pin toggle)
+	GpioCtrlRegs.GPADIR.bit.GPIO19 = 1;
 
+	GpioCtrlRegs.GPADIR.bit.GPIO2 = 0;
 	GpioCtrlRegs.GPADIR.bit.GPIO2 = 1;
 	GpioCtrlRegs.GPADIR.bit.GPIO3 = 1;
 	GpioCtrlRegs.GPADIR.bit.GPIO4 = 1;
 
-	GpioDataRegs.GPASET.bit.GPIO2 = 0;
+	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 	GpioDataRegs.GPASET.bit.GPIO3 = 0;
 	GpioDataRegs.GPASET.bit.GPIO4 = 1;
 

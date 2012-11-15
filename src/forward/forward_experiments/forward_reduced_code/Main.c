@@ -16,6 +16,11 @@ Uint16 DEBUG_TOGGLE = 1;					// Used for realtime mode investigation test
 int D = 1;  // While D = 1, the current hasnt reached the hysteresis cycle
 int step = 0;
 int sinValues[SIN_DEFINITION];
+// EPWM1 Global Variable
+short int lastPos = 2;
+	// 1 High
+	// 0 Low
+	// 2 First time
 
 /**********************************************************************
 * Function: main()
@@ -42,30 +47,36 @@ void main(void)
 
 
 // Variable Initialization
-	asm (" ESTOP0");							// Emulator Halt instruction¡
+	// asm (" ESTOP0");							// Emulator Halt instruction¡
 
 //--- Enable global interrupts
 		// Enable global interrupts and realtime debug
-	//asm("DBGM");
+	 // asm("DBGM");
 
-	asm(" CLRC INTM");
+	 // asm(" CLRC INTM");
 
-	EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
-			 						// 0 ||	00 Does nothing (action disabled)
-			 						// 1 ||	01 Clear (low)
-			 						// 2 ||	10 Set (high)
-			 						// 3 ||	11 Toggle
-	EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+	 GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
-	 //--- Main Loop
-	 	while(D)							// endless loop - wait for an interrupt
-	 	{
-	 	}
+	 asm (" ESTOP0");
+
+	 GpioDataRegs.GPASET.bit.GPIO2 = 1;
 
 	 //--- Main Loop
 	 	while(1)							// endless loop - wait for an interrupt
 	 	{
-	 		asm(" NOP");
+	 		if (Comp1Regs.COMPSTS.bit.COMPSTS == 1 && (lastPos == 0 || lastPos == 2)) {
+
+	 				GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
+
+	 				lastPos = 1;
+	 			}
+	 			// If DCAEVT2 generated this interruption
+	 			if (Comp2Regs.COMPSTS.bit.COMPSTS == 0 &&  (lastPos == 1 || lastPos == 2)) {
+	 				GpioDataRegs.GPASET.bit.GPIO2 = 1;
+
+	 				lastPos = 0;
+	 			}
+//	 		asm(" NOP");
 	 	}
 
 } //end of main()
