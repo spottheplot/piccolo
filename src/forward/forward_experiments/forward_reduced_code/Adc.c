@@ -43,6 +43,29 @@ void InitAdc(void)
 
 	DelayUs(1000);						// Wait 1 ms after power-up before using the ADC
 
+	//--- Configure SOC0 to proc when its software forced in TZINT1
+
+		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN0 = 0;		// SOC0 in single sample mode (vs. simultaneous mode)
+
+
+		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 00h;			// Trigger using software only
+		AdcRegs.ADCSOC0CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+		AdcRegs.ADCSOC0CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+				// Each ADC clock cycle lasts 25ns --> 50 * 25 = 1250 ns time to read the input voltage
+
+		AdcRegs.ADCINTSOCSEL1.bit.SOC0 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+
+		AdcRegs.SOCPRICTL.bit.SOCPRIORITY = 0;		// All SOCs handled in round-robin mode
+
+	//--- ADCINT1 configuration
+		AdcRegs.INTSEL1N2.bit.INT1CONT = 1;			// ADCINT1 pulses regardless of ADCINT1 flag state
+		AdcRegs.INTSEL1N2.bit.INT1E = 1;			// Enable ADCINT1
+		AdcRegs.INTSEL1N2.bit.INT1SEL = 0;			// EOC0 triggers ADCINT1
+
+	//--- Enable the ADC interrupt
+		PieCtrlRegs.PIEIER1.bit.INTx1 = 1;			// Enable ADCINT1 in PIE group 1
+		IER |= 0x0001;
+
 
 	//--- Comparator 1 Configuration --> If (input + > input -) --> CompOut = 1
 														// If (input + < input -) --> CompOut = 0
@@ -52,6 +75,7 @@ void InitAdc(void)
 												// 0 Negative input is generated internally via DAC and compared to an input  + which is an external pin
 		Comp1Regs.COMPCTL.bit.SYNCSEL = 0; //Asynchronous Comp1 Output
 		Comp1Regs.COMPCTL.bit.QUALSEL =  0; // Don't Care
+
 
 		Comp1Regs.DACVAL.bit.DACVAL = 550; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
 

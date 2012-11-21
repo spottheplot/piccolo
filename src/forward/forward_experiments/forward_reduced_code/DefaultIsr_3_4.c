@@ -163,10 +163,17 @@ interrupt void USER12_ISR(void)					// 0x000D3E  USER12 (Software interrupt #12)
 }
 
 //---------------------------------------------------------------------
+
+float Kv, Rl, Ki;
+
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 
+	Comp1Regs.DACVAL.bit.DACVAL = (int) (AdcResult.ADCRESULT0 * Kv / Rl * Ki);
+
+//--- Manage the ADC registers
+	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
 }
 
 //---------------------------------------------------------------------

@@ -64,19 +64,23 @@ void main(void)
 	 //--- Main Loop
 	 	while(1)							// endless loop - wait for an interrupt
 	 	{
+	 		GpioDataRegs.GPASET.bit.GPIO2 = 1;
 	 		if (Comp1Regs.COMPSTS.bit.COMPSTS == 1 && (lastPos == 0 || lastPos == 2)) {
 
-	 				GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
+	 				GpioDataRegs.GPACLEAR.bit.GPIO19 = 1;
 
 	 				lastPos = 1;
+
+	 				AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation
 	 			}
 	 			// If DCAEVT2 generated this interruption
-	 			if (Comp2Regs.COMPSTS.bit.COMPSTS == 0 &&  (lastPos == 1 || lastPos == 2)) {
-	 				GpioDataRegs.GPASET.bit.GPIO2 = 1;
+			if (Comp2Regs.COMPSTS.bit.COMPSTS == 0 &&  (lastPos == 1 || lastPos == 2)) {
+				GpioDataRegs.GPASET.bit.GPIO19 = 1;
 
-	 				lastPos = 0;
-	 			}
+				lastPos = 0;
+			}
 //	 		asm(" NOP");
+	 		GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 	 	}
 
 } //end of main()

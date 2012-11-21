@@ -43,6 +43,10 @@
 extern int D;
 extern int sinValues[SIN_DEFINITION];
 
+extern int Ki = 1.6;
+extern int Kv = 0.0085;
+extern int Rl ;
+
 extern int step;
 extern int state;
 extern int plain;
