@@ -48,7 +48,7 @@ void InitAdc(void)
 		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN0 = 0;		// SOC0 in single sample mode (vs. simultaneous mode)
 
 
-		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 00h;			// Trigger using software only
+		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 0;			// Trigger using software only
 		AdcRegs.ADCSOC0CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
 		AdcRegs.ADCSOC0CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
 				// Each ADC clock cycle lasts 25ns --> 50 * 25 = 1250 ns time to read the input voltage

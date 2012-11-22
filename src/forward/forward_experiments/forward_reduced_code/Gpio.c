@@ -25,7 +25,7 @@ void InitGpio(void)
 	GpioCtrlRegs.GPADIR.all   = 0x00000000;		// All group A GPIO are inputs
 	GpioCtrlRegs.GPAPUD.all   = 0x00000FFF;		// Pullups enabled GPIO31-12, disabled GPIO11-0
 
-	GpioCtrlRegs.GPAMUX1.bit.GPIO0  = 0;		// 0=GPIO               1=EPWM1A     2=rsvd       3=rsvd
+	GpioCtrlRegs.GPAMUX1.bit.GPIO0  = 1;		// 0=GPIO               1=EPWM1A     2=rsvd       3=rsvd
 	GpioCtrlRegs.GPAMUX1.bit.GPIO1  = 3;		// 0=GPIO               1=EPWM1B     2=rsvd       3=COMP1OUT
 	GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 0;		// 0=GPIO               1=EPWM2A     2=rsvd       3=rsvd
 	GpioCtrlRegs.GPAMUX1.bit.GPIO3  = 3;		// 0=GPIO               1=EPWM2B     2=SPISOMIA   3=COMP2OUT

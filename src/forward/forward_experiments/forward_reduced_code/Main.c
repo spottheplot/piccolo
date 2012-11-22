@@ -47,13 +47,13 @@ void main(void)
 
 
 // Variable Initialization
-	// asm (" ESTOP0");							// Emulator Halt instruction¡
+	 asm (" ESTOP0");							// Emulator Halt instruction¡
 
 //--- Enable global interrupts
 		// Enable global interrupts and realtime debug
-	 // asm("DBGM");
+	 asm("DBGM");
 
-	 // asm(" CLRC INTM");
+	 asm(" CLRC INTM");
 
 	 GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
@@ -64,10 +64,9 @@ void main(void)
 	 //--- Main Loop
 	 	while(1)							// endless loop - wait for an interrupt
 	 	{
-	 		GpioDataRegs.GPASET.bit.GPIO2 = 1;
 	 		if (Comp1Regs.COMPSTS.bit.COMPSTS == 1 && (lastPos == 0 || lastPos == 2)) {
 
-	 				GpioDataRegs.GPACLEAR.bit.GPIO19 = 1;
+	 				//GpioDataRegs.GPACLEAR.bit.GPIO19 = 1;
 
 	 				lastPos = 1;
 
@@ -75,12 +74,11 @@ void main(void)
 	 			}
 	 			// If DCAEVT2 generated this interruption
 			if (Comp2Regs.COMPSTS.bit.COMPSTS == 0 &&  (lastPos == 1 || lastPos == 2)) {
-				GpioDataRegs.GPASET.bit.GPIO19 = 1;
+				//GpioDataRegs.GPASET.bit.GPIO19 = 1;
 
 				lastPos = 0;
 			}
 //	 		asm(" NOP");
-	 		GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 	 	}
 
 } //end of main()

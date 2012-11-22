@@ -164,16 +164,31 @@ interrupt void USER12_ISR(void)					// 0x000D3E  USER12 (Software interrupt #12)
 
 //---------------------------------------------------------------------
 
-float Kv, Rl, Ki;
+float Ki = 3.2;
+float Kv = 0.0085;
+float Rl = 272;
+long int dacTest = 0;
 
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 
-	Comp1Regs.DACVAL.bit.DACVAL = (int) (AdcResult.ADCRESULT0 * Kv / Rl * Ki);
+	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
+	//Comp1Regs.DACVAL.bit.DACVAL =
+	dacTest = (int) (AdcResult.ADCRESULT0 * Kv / Rl * Ki / 16);
+	//dacTest = AdcResult.ADCRESULT0;
+
+	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
+
+
+
+
+ 	asm(" EALLOW");	// Enable EALLOW protected register access
 
 //--- Manage the ADC registers
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
+
+ 	asm(" EDIS");						// Disable EALLOW protected register access
+
 }
 
 //---------------------------------------------------------------------

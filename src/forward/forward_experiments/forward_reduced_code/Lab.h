@@ -34,18 +34,28 @@
 // So we need to call to an interruption 300 * 100 = 30 kHz
 #define ENVELOPE_SAMPLE_PERIOD	2666		// 2666 = 30 kHz sampling w/ 80 MHz SYSCLKOUT
 
+// Frequency for asymmetric PWM
+//  The system clock runs at 80 Mhz --> ( 80 Mhz / X Hz ) - 1 = PWM_PERIOD
+#define PWM_PERIOD	888		// 666 = 667  Period for 90 kHz Asymmetric PWM
+
+// Duty cycle. The counter will go up each clock cycle. When it reaches PWM_DUTY_CYCLE, it will set PWM signal high.
+// It will remain high until the counter reaches PWM_PERIOD or PWM_HALF_PERIOD. Then the PWM signal and the counter will be reset to 0
+#define PWM_DUTY_CYCLE	266	//30% duty cycle --> 266 for Asymmetric  PWM
+
+
+
 #define SIN_DEFINITION 300 // Number of steps in which a sine wave is divided
 #define SIN_AMPLITUDE 200 // The difference between the Peak of the sine and the lower hysteresis band. This values are refered to the DAC value of the internal comparator
 #define PI 3.14159f
-#define LOWER_HYSTERESIS_BAND 400 // Sine offset (DAC value at which the sine is zero)
+#define LOWER_HYSTERESIS_BAND 2 // Sine offset (DAC value at which the sine is zero)
 #define UPPER_HYSTERESIS_BAND 500
 
 extern int D;
 extern int sinValues[SIN_DEFINITION];
 
-extern int Ki = 1.6;
-extern int Kv = 0.0085;
-extern int Rl ;
+extern float Ki;
+extern float Kv;
+extern float Rl; // Rload set so the forward converter gives Imax = 0.6 A (In our case)
 
 extern int step;
 extern int state;
