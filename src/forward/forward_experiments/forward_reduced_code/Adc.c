@@ -45,7 +45,7 @@ void InitAdc(void)
 
 	//--- Configure SOC0 to proc when its software forced in TZINT1
 
-		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN0 = 0;		// SOC0 in single sample mode (vs. simultaneous mode)
+		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN0 = 0;		// SOC0/1 in single sample mode (vs. simultaneous mode)
 
 
 		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 0;			// Trigger using software only
@@ -56,6 +56,27 @@ void InitAdc(void)
 		AdcRegs.ADCINTSOCSEL1.bit.SOC0 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
 
 		AdcRegs.SOCPRICTL.bit.SOCPRIORITY = 0;		// All SOCs handled in round-robin mode
+
+	// Configure SOC1, SOC2 and SOC3 as SOC0 to oversample x4 the measure
+
+		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN2 = 0;		// SOC2/3 in single sample mode (vs. simultaneous mode)
+
+		AdcRegs.ADCSOC1CTL.bit.TRIGSEL = 0;			// Trigger using software only
+		AdcRegs.ADCSOC2CTL.bit.TRIGSEL = 0;			// Trigger using software only
+		AdcRegs.ADCSOC3CTL.bit.TRIGSEL = 0;			// Trigger using software only
+
+		AdcRegs.ADCSOC1CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+		AdcRegs.ADCSOC2CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+		AdcRegs.ADCSOC3CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+
+		AdcRegs.ADCSOC1CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+		AdcRegs.ADCSOC2CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+		AdcRegs.ADCSOC3CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+
+		AdcRegs.ADCINTSOCSEL1.bit.SOC1 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+		AdcRegs.ADCINTSOCSEL1.bit.SOC2 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+		AdcRegs.ADCINTSOCSEL1.bit.SOC3 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+
 
 	//--- ADCINT1 configuration
 		AdcRegs.INTSEL1N2.bit.INT1CONT = 1;			// ADCINT1 pulses regardless of ADCINT1 flag state
@@ -89,7 +110,7 @@ void InitAdc(void)
 		Comp2Regs.COMPCTL.bit.QUALSEL =  0; // Don't Care
 		Comp2Regs.DACVAL.bit.DACVAL = 2; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
 
-		 AdcRegs.ADCCTL1.bit.ADCBGPWD = 1; // It's already been enabled, but it's necessary to enable it for the comparator to work
+		AdcRegs.ADCCTL1.bit.ADCBGPWD = 1; // It's already been enabled, but it's necessary to enable it for the comparator to work
 
 //--- Finish up
 	AdcRegs.ADCCTL1.bit.ADCENABLE = 1;	// Enable the ADC

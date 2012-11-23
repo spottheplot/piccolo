@@ -70,6 +70,9 @@ void main(void)
 
 	 				lastPos = 1;
 
+	 				AdcRegs.ADCSOCFRC1.bit.SOC3 = 1; // Forces SOC0 generation
+	 				AdcRegs.ADCSOCFRC1.bit.SOC2 = 1; // Forces SOC0 generation
+	 				AdcRegs.ADCSOCFRC1.bit.SOC1 = 1; // Forces SOC0 generation
 	 				AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation
 	 			}
 	 			// If DCAEVT2 generated this interruption
