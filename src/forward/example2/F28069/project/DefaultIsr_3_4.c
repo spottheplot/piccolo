@@ -163,18 +163,29 @@ interrupt void USER12_ISR(void)					// 0x000D3E  USER12 (Software interrupt #12)
 }
 
 //---------------------------------------------------------------------
+
+float Ki = 3.2;
+float Kv = 0.0085;
+float Rl = 540; //272;
+double dacTest = 0;
+double adcRes = 0;
+int intDacTest = 0;
+
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 
-//--- Manage the ADC registers     
+	adcRes = (AdcResult.ADCRESULT0 + AdcResult.ADCRESULT1 + AdcResult.ADCRESULT2 + AdcResult.ADCRESULT3) / 4;
+	dacTest = (adcRes / Kv / Rl * Ki / 16);
+	intDacTest = (int)(dacTest + 0.5);
+	//Comp1Regs.DACVAL.bit.DACVAL = intDacTest;  This line will be uncommented when the gains are calculated
+
+ 	asm(" EALLOW");	// Enable EALLOW protected register access
+ 	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
+//--- Manage the ADC registers
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
 
-//--- Modify Upper Hysteresis Band
-	step ++;
-	Comp1Regs.DACVAL.bit.DACVAL = sinValues[step];
-	if (step == SIN_DEFINITION)
-		step = 0;
+ 	asm(" EDIS");						// Disable EALLOW protected register access
 }
 
 //---------------------------------------------------------------------
@@ -240,16 +251,11 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 	while(1);
 }
 
-// EPWM1 Global Variable
-short int lastPos = 2;
-	// 1 High
-	// 0 Low
-	// 2 First time
-
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
 	if (EPwm1Regs.TZFLG.bit.DCAEVT1 == 1) {
+		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
 		asm(" EALLOW");	// Enable EALLOW protected register access
 		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
 		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
@@ -257,7 +263,7 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 		asm(" EDIS");
 	}
 
-	if (EPwm1Regs.TZFLG.bit.DCAEVT2 == 1)
+	if (EPwm1Regs.TZFLG.bit.DCAEVT2 == 1) {
 		asm(" EALLOW");	// Enable EALLOW protected register access
 		EPwm1Regs.TZCLR.bit.OST = 1;
 		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
@@ -265,6 +271,7 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 		EPwm1Regs.TBCTR = 0x0000;
 		EPwm1Regs.TZCLR.bit.INT = 1;
 		asm(" EDIS");
+	}
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }

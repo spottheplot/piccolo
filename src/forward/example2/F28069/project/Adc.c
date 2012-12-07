@@ -43,16 +43,39 @@ void InitAdc(void)
 
 	DelayUs(1000);						// Wait 1 ms after power-up before using the ADC
 
-	//--- SOC0 configuration
-		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN0 = 0;		// SOC0 in single sample mode (vs. simultaneous mode)
+	//--- Configure SOC0 to proc when its software forced in TZINT1
 
-		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 7;			// Trigger using ePWM2-ADCSOCA
+		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN0 = 0;		// SOC0/1 in single sample mode (vs. simultaneous mode)
+
+		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 0;			// Trigger using software only
 		AdcRegs.ADCSOC0CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
-		AdcRegs.ADCSOC0CTL.bit.ACQPS = 6;			// Acquisition window set to (6+1)=7 cycles
+		AdcRegs.ADCSOC0CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+				// Each ADC clock cycle lasts 25ns --> 50 * 25 = 1250 ns time to read the input voltage
 
 		AdcRegs.ADCINTSOCSEL1.bit.SOC0 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
 
 		AdcRegs.SOCPRICTL.bit.SOCPRIORITY = 0;		// All SOCs handled in round-robin mode
+
+	// Configure SOC1, SOC2 and SOC3 as SOC0 to oversample x4 the measure
+
+		AdcRegs.ADCSAMPLEMODE.bit.SIMULEN2 = 0;		// SOC2/3 in single sample mode (vs. simultaneous mode)
+
+		AdcRegs.ADCSOC1CTL.bit.TRIGSEL = 0;			// Trigger using software only
+		AdcRegs.ADCSOC2CTL.bit.TRIGSEL = 0;			// Trigger using software only
+		AdcRegs.ADCSOC3CTL.bit.TRIGSEL = 0;			// Trigger using software only
+
+		AdcRegs.ADCSOC1CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+		AdcRegs.ADCSOC2CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+		AdcRegs.ADCSOC3CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
+
+		AdcRegs.ADCSOC1CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+		AdcRegs.ADCSOC2CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+		AdcRegs.ADCSOC3CTL.bit.ACQPS = 49;			// Acquisition window set to (49+1)=50 cycles
+
+		AdcRegs.ADCINTSOCSEL1.bit.SOC1 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+		AdcRegs.ADCINTSOCSEL1.bit.SOC2 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+		AdcRegs.ADCINTSOCSEL1.bit.SOC3 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
+
 
 	//--- ADCINT1 configuration
 		AdcRegs.INTSEL1N2.bit.INT1CONT = 1;			// ADCINT1 pulses regardless of ADCINT1 flag state

@@ -37,10 +37,14 @@
 #define SIN_DEFINITION 300 // Number of steps in which a sine wave is divided
 #define SIN_AMPLITUDE 200 // The difference between the Peak of the sine and the lower hysteresis band. This values are refered to the DAC value of the internal comparator
 #define PI 3.14159f
-#define LOWER_HYSTERESIS_BAND 400 // Sine offset (DAC value at which the sine is zero)
+#define LOWER_HYSTERESIS_BAND 2 // Sine offset (DAC value at which the sine is zero)
 
 extern int D;
 extern int sinValues[SIN_DEFINITION];
+
+extern float Ki;
+extern float Kv;
+extern float Rl; // Rload set so the forward converter gives Imax = 0.6 A (In our case)
 
 extern int step;
 extern int state;
