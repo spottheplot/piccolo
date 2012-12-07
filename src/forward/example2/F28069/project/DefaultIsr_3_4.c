@@ -167,6 +167,14 @@ interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 
+//--- Manage the ADC registers     
+	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
+
+//--- Modify Upper Hysteresis Band
+	step ++;
+	Comp1Regs.DACVAL.bit.DACVAL = sinValues[step];
+	if (step == SIN_DEFINITION)
+		step = 0;
 }
 
 //---------------------------------------------------------------------
@@ -254,6 +262,7 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 		EPwm1Regs.TZCLR.bit.OST = 1;
 		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
 		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
+		EPwm1Regs.TBCTR = 0x0000;
 		EPwm1Regs.TZCLR.bit.INT = 1;
 		asm(" EDIS");
 

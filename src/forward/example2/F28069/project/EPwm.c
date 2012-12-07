@@ -26,6 +26,45 @@ void InitEPwm(void)
 	SysCtrlRegs.PCLKCR0.bit.TBCLKSYNC = 0;
 	asm(" EDIS");						// Disable EALLOW protected register access
 
+	//---------------------------------------------------------------------
+	//--- Configure ePWM2 to trigger the ADC at a 50 kHz rate
+	//---------------------------------------------------------------------
+		EPwm2Regs.TBCTL.bit.CTRMODE = 0x3;		// Disable the timer
+
+		EPwm2Regs.TBCTL.all = 0xC033;			// Configure timer control register
+	// bit 15-14     11:     FREE/SOFT, 11 = ignore emulation suspend
+	// bit 13        0:      PHSDIR, 0 = count down after sync event
+	// bit 12-10     000:    CLKDIV, 000 => TBCLK = HSPCLK/1
+	// bit 9-7       000:    HSPCLKDIV, 000 => HSPCLK = SYSCLKOUT/1
+	// bit 6         0:      SWFSYNC, 0 = no software sync produced
+	// bit 5-4       11:     SYNCOSEL, 11 = sync-out disabled
+	// bit 3         0:      PRDLD, 0 = reload PRD on counter=0
+	// bit 2         0:      PHSEN, 0 = phase control disabled
+	// bit 1-0       11:     CTRMODE, 11 = timer stopped (disabled)
+
+		EPwm2Regs.TBCTR = 0x0000;				// Clear timer counter
+		EPwm2Regs.TBPRD = ENVELOPE_SAMPLE_PERIOD;	// Set timer period
+		EPwm2Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase
+
+		EPwm2Regs.ETPS.all = 0x0100;			// Configure SOCA
+	// bit 15-14     00:     EPWMxSOCB, read-only
+	// bit 13-12     00:     SOCBPRD, don't care
+	// bit 11-10     00:     EPWMxSOCA, read-only
+	// bit 9-8       01:     SOCAPRD, 01 = generate SOCA on first event
+	// bit 7-4       0000:   reserved
+	// bit 3-2       00:     INTCNT, don't care
+	// bit 1-0       00:     INTPRD, don't care
+
+		EPwm2Regs.ETSEL.all = 0x0A00;			// Enable SOCA to ADC
+	// bit 15        0:      SOCBEN, 0 = disable SOCB
+	// bit 14-12     000:    SOCBSEL, don't care
+	// bit 11        1:      SOCAEN, 1 = enable SOCA
+	// bit 10-8      010:    SOCASEL, 010 = SOCA on PRD event
+	// bit 7-4       0000:   reserved
+	// bit 3         0:      INTEN, 0 = disable interrupt
+	// bit 2-0       000:    INTSEL, don't care
+
+		EPwm2Regs.TBCTL.bit.CTRMODE = 0x0;		// Enable the timer in count up mode
 //---------------------------------------------------------------------
 //--- Configure ePWM1
 //---------------------------------------------------------------------
@@ -44,7 +83,7 @@ void InitEPwm(void)
 // bit 1-0       11:     CTRMODE, 11 = timer stopped (disabled)
 
 	EPwm1Regs.TBCTR = 0x0000;				// Clear timer counter
-	EPwm1Regs.TBPRD = 30;		// Set timer period
+	EPwm1Regs.TBPRD = 60000;		// Set timer period
 //	EPwm1Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase
 //
 ////	 2. Compare Module --> We don't need this module set for this example
@@ -93,6 +132,20 @@ void InitEPwm(void)
 //// bit 3-2       00:     CSFB, 00 = forcing disabled
 //// bit 1-0       00:     CSFA, 00 = forcing disabled
 
+	EPwm1Regs.AQSFRC.bit.RLDCSF = 3;
+		//	AQCSFRC Active Register Reload From Shadow Options
+				//	00 Load on event counter equals zero
+				//	01 Load on event counter equals period
+				//	10 Load on event counter equals zero or counter equals period
+				//	11 Load immediately
+
+	EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
+			 						// 0 ||	00 Does nothing (action disabled)
+			 						// 1 ||	01 Clear (low)
+			 						// 2 ||	10 Set (high)
+			 						// 3 ||	11 Toggle
+
+
 	// 4. Deadband
 	EPwm1Regs.DBCTL.bit.OUT_MODE = 0; // Deadband disabled
 
@@ -122,7 +175,7 @@ void InitEPwm(void)
 						//	4 || 100 DCAL = high, DCAH = don't care
 						//	5 || 101 DCAL = high, DCAH = low
 
-				EPwm1Regs.DCACTL.bit.EVT1SRCSEL = 0; // Here we choose if we want to filter the signal
+				EPwm1Regs.DCACTL.bit.EVT1SRCSEL = 1; // Here we choose if we want to filter the signal
 						// 0 Source is DCAEVT Signal
 						// 1 Source is DCAEVTFILT Signal
 
@@ -169,7 +222,7 @@ void InitEPwm(void)
 
 				EPwm1Regs.DCACTL.bit.EVT2SRCSEL = 0; // Here we choose if we want to filter the signal
 						// 0 Source is DCAEVT Signal
-						// 1 Source is DCBEVTFILT Signal
+						// 1 Source is DCAEVTFILT Signal
 
 				EPwm1Regs.DCACTL.bit.EVT2FRCSYNCSEL = 1;  // Force Sync Signal Select
 						// 0 Source is Sync signal
@@ -194,43 +247,43 @@ void InitEPwm(void)
 
 //				// Digital filter window configuration
 //
-//				EPwm1Regs.DCFCTL.bit.PULSESEL = 1;
-//							//		PULSESEL Pulse Select For Blanking & Capture Alignment
-//							//		00 Time-base counter equal to period (TBCTR = TBPRD)
-//							//		01 Time-base counter equal to zero (TBCTR = 0x0000)
-//
-//				EPwm1Regs.DCFCTL.bit.BLANKINV = 0;
-//							//		Blanking Window Inversion
-//							//		0 Blanking window not inverted
-//							//		1 Blanking window inverted
-//
-//				EPwm1Regs.DCFCTL.bit.SRCSEL = 00;
-//							//		Filter Block Signal Source Select
-//							//		00 Source Is DCAEVT1 Signal
-//							//		01 Source Is DCAEVT2 Signal
-//							//		10 Source Is DCBEVT1 Signal
-//							//		11 Source Is DCBEVT2 Signal
-//
-//				EPwm1Regs.DCFCTL.bit.BLANKE = 1;
-//							//		Blanking Window Enable/Disable
-//							//		0 Blanking window is disabled
-//							//		1 Blanking window is enabled
-//
-//				EPwm1Regs.DCFWINDOW = 30;
-//							//		Blanking Window Width
-//							//		00h 	 No blanking window is generated.
-//							//		01-FFh	 Specifies the width of the blanking window in TBCLK cycles. The blanking window begins
-//							//				 when the offset counter expires.
-//				EPwm1Regs.DCFOFFSET = 0;
-//							//		Blanking Window Offset
-//							//		These 16-bits specify the number of TBCLK cycles from the blanking window reference to the
-//							//		point when the blanking window is applied. The blanking window reference is either period or
-//							//		zero as defined by the DCFCTL[PULSESEL] bit.
+				EPwm1Regs.DCFCTL.bit.PULSESEL = 1;
+							//		PULSESEL Pulse Select For Blanking & Capture Alignment
+							//		00 Time-base counter equal to period (TBCTR = TBPRD)
+							//		01 Time-base counter equal to zero (TBCTR = 0x0000)
+
+				EPwm1Regs.DCFCTL.bit.BLANKINV = 0;
+							//		Blanking Window Inversion
+							//		0 Blanking window not inverted
+							//		1 Blanking window inverted
+
+				EPwm1Regs.DCFCTL.bit.SRCSEL = 0;
+							//		Filter Block Signal Source Select
+							//		00 Source Is DCAEVT1 Signal
+							//		01 Source Is DCAEVT2 Signal
+							//		10 Source Is DCBEVT1 Signal
+							//		11 Source Is DCBEVT2 Signal
+
+				EPwm1Regs.DCFCTL.bit.BLANKE = 1;
+							//		Blanking Window Enable/Disable
+							//		0 Blanking window is disabled
+							//		1 Blanking window is enabled
+
+				EPwm1Regs.DCFWINDOW = 30;
+							//		Blanking Window Width
+							//		00h 	 No blanking window is generated.
+							//		01-FFh	 Specifies the width of the blanking window in TBCLK cycles. The blanking window begins
+							//				 when the offset counter expires.
+				EPwm1Regs.DCFOFFSET = 0;
+							//		Blanking Window Offset
+							//		These 16-bits specify the number of TBCLK cycles from the blanking window reference to the
+							//		point when the blanking window is applied. The blanking window reference is either period or
+							//		zero as defined by the DCFCTL[PULSESEL] bit.
 
 		asm(" EDIS");						// Disable EALLOW protected register access
 
 	// 7. Set the timer
-	EPwm1Regs.TBCTL.bit.CTRMODE = 0x3;
+	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;
 			//  00 Up-count mode
 			//	01 Down-count mode
 			//	10 Up-down-count mode

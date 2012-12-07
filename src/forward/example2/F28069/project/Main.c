@@ -42,23 +42,18 @@ void main(void)
 
 
 // Variable Initialization
-	asm (" ESTOP0");							// Emulator Halt instruction
+ 	asm (" ESTOP0");							// Emulator Halt instruction
 
 //--- Enable global interrupts
 		// Enable global interrupts and realtime debug
 	asm("DBGM");
 
-	asm(" CLRC INTM");
-
 	 //--- Main Loop
-	EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
-			 						// 0 ||	00 Does nothing (action disabled)
-			 						// 1 ||	01 Clear (low)
-			 						// 2 ||	10 Set (high)
-			 						// 3 ||	11 Toggle
-	EPwm1Regs.AQSFRC.bit.OTSFA = 1; // Invoke One-Time Software Forced Event on Output A
+	// Force EPwm1 high
+	EPwm1Regs.AQCSFRC.bit.CSFA = 2; // Invoke One-Time Software Forced Event on Output A
+//	EPwm1Regs.AQSFRC.bit.OTSFA = 1;
 
-
+	asm(" CLRC INTM");
 
 	 //--- Main Loop
 	 	while(1)							// endless loop - wait for an interrupt
