@@ -93,6 +93,14 @@ void InitEPwm(void)
 //// bit 3-2       00:     CSFB, 00 = forcing disabled
 //// bit 1-0       00:     CSFA, 00 = forcing disabled
 
+	EPwm1Regs.AQSFRC.bit.RLDCSF = 3;
+			//	AQCSFRC Active Register Reload From Shadow Options
+					//	00 Load on event counter equals zero
+					//	01 Load on event counter equals period
+					//	10 Load on event counter equals zero or counter equals period
+					//	11 Load immediately
+
+
 	EPwm1Regs.AQSFRC.bit.ACTSFA = 2; //  What to do when One-Time Software Forced Event is invoked
 			 						// 0 ||	00 Does nothing (action disabled)
 			 						// 1 ||	01 Clear (low)
