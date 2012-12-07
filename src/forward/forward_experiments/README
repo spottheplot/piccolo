@@ -1,0 +1,1 @@
+forward_experiments is a modification of forward example 2 trying to decrease the latency between calling a PWM interruption and changing the PWM value. We won't add new functionalities, or follow a coherent line of developement. We will modifiy and try different ways to do the same thing and will use the fastest in the original code of example 2.
