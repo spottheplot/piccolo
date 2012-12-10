@@ -254,45 +254,25 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
-//	if (EPwm1Regs.TZFLG.bit.DCAEVT1 == 1) {
-//		asm(" EALLOW");	// Enable EALLOW protected register access
-//		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
-//		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
-//		EPwm1Regs.TZCLR.bit.INT = 1;
-//		asm(" EDIS");
-//	}
-//
-//	if (EPwm1Regs.TZFLG.bit.DCAEVT2 == 1)
-//		asm(" EALLOW");	// Enable EALLOW protected register access
-//		EPwm1Regs.TZCLR.bit.OST = 1;
-//		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
-//		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
-//		EPwm1Regs.TBCTR = 0x0000;
-//		EPwm1Regs.TZCLR.bit.INT = 1;
-//		asm(" EDIS");
-
 	if (EPwm1Regs.TZFLG.bit.DCAEVT1 == 1) {
 //		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
 		// --> When ADC Int is called, the freq at which  we can toggle is heavily reduced (from 300kHz to 25kHz)
-		asm(" EALLOW");	// Enable EALLOW protected register access
-		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
-		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
-		EPwm1Regs.TZCLR.bit.INT = 1;
-		asm(" EDIS");
-	}
+	} else if (EPwm1Regs.TZFLG.bit.DCAEVT2 == 1) {
 
-	if (EPwm1Regs.TZFLG.bit.DCAEVT2 == 1) {
 		asm(" EALLOW");	// Enable EALLOW protected register access
-		EPwm1Regs.TZCLR.bit.OST = 1;
-		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
-		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
 		EPwm1Regs.TBCTL.bit.CTRMODE = 0x3;
 		EPwm1Regs.TBCTR = 0x0000;
 		EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;
-		EPwm1Regs.TZCLR.bit.INT = 1;
+		EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
+		EPwm1Regs.TZCLR.bit.OST = 1;
 		asm(" EDIS");
 	}
 
+	asm(" EALLOW");	// Enable EALLOW protected register access
+	EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
+	EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
+	EPwm1Regs.TZCLR.bit.INT = 1;
+	asm(" EDIS");
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
 
