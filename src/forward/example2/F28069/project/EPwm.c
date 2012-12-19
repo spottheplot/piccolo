@@ -229,7 +229,7 @@ void InitEPwm(void)
 							//		0 Blanking window is disabled
 							//		1 Blanking window is enabled
 
-				EPwm1Regs.DCFWINDOW = 30;
+				EPwm1Regs.DCFWINDOW = 50;
 							//		Blanking Window Width
 							//		00h 	 No blanking window is generated.
 							//		01-FFh	 Specifies the width of the blanking window in TBCLK cycles. The blanking window begins

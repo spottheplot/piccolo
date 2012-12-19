@@ -164,24 +164,24 @@ interrupt void USER12_ISR(void)					// 0x000D3E  USER12 (Software interrupt #12)
 
 //---------------------------------------------------------------------
 
-float Ki = 3.2;
-float Kv = 0.0085;
-float Rl = 540; //272;
-double dacTest = 0;
-double adcRes = 0;
-int intDacTest = 0;
+//float Ki = 3.2;
+//float Kv = 0.0085;
+//float Rl = 272; //272;
+//double dacTest = 0;
+//double adcRes = 0;
+//int intDacTest = 0;
 
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
-
-	adcRes = (AdcResult.ADCRESULT0 + AdcResult.ADCRESULT1) /2 ; // + AdcResult.ADCRESULT2 + AdcResult.ADCRESULT3) / 4;
-	dacTest = (adcRes / Kv / Rl * Ki / 16);
-	intDacTest = (int)(dacTest + 0.5);
-	//Comp1Regs.DACVAL.bit.DACVAL = intDacTest;  This line will be uncommented when the gains are calculated
-
+//	GpioDataRegs.GPASET.bit.GPIO2 = 1;
+//	adcRes = (AdcResult.ADCRESULT0) ; // + AdcResult.ADCRESULT2 + AdcResult.ADCRESULT3) / 4;
+//	dacTest = (adcRes * 0.18);// / Kv / Rl * Ki / 16);
+//	intDacTest = (int)(dacTest);
+//	Comp1Regs.DACVAL.bit.DACVAL = intDacTest;  //This line will be uncommented when the gains are calculated
+	Comp1Regs.DACVAL.bit.DACVAL = 0.18 * AdcResult.ADCRESULT0;
  	asm(" EALLOW");	// Enable EALLOW protected register access
- 	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
+// 	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 //--- Manage the ADC registers
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
 
@@ -250,16 +250,26 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 	asm (" ESTOP0");							// Emulator Halt instruction
 	while(1);
 }
-
+int wDUp =50;
+int wUDown = 50;
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
 	if (EPwm1Regs.TZFLG.bit.DCAEVT1 == 1) {
-//		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
+//		int i;
+//		for (i=1; i < 40;  i++) {
+//			asm(" NOP");
+//		}
+		EPwm1Regs.DCFWINDOW = wUDown;
+		EPwm1Regs.TBCTL.bit.CTRMODE = 0x3;
+		EPwm1Regs.TBCTR = 0x0000;
+		EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;
+//		GpioDataRegs.GPBTOGGLE.bit.GPIO34 = 1;
+		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
 		// --> When ADC Int is called, the freq at which  we can toggle is heavily reduced (from 300kHz to 25kHz)
 	} else if (EPwm1Regs.TZFLG.bit.DCAEVT2 == 1) {
-
 		asm(" EALLOW");	// Enable EALLOW protected register access
+		EPwm1Regs.DCFWINDOW = wDUp;
 		EPwm1Regs.TBCTL.bit.CTRMODE = 0x3;
 		EPwm1Regs.TBCTR = 0x0000;
 		EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;

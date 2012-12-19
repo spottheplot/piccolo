@@ -49,7 +49,7 @@ void InitAdc(void)
 
 		AdcRegs.ADCSOC0CTL.bit.TRIGSEL = 0;			// Trigger using software only
 		AdcRegs.ADCSOC0CTL.bit.CHSEL = 0;			// Convert channel ADCINA0 (ch0)
-		AdcRegs.ADCSOC0CTL.bit.ACQPS = 6;			// Acquisition window set to (49+1)=50 cycles
+		AdcRegs.ADCSOC0CTL.bit.ACQPS = 7;			// Acquisition window set to (49+1)=50 cycles
 				// Each ADC clock cycle lasts 25ns --> 50 * 25 = 1250 ns time to read the input voltage
 
 		AdcRegs.ADCINTSOCSEL1.bit.SOC0 = 0;			// No ADCINT triggers SOC0.  TRIGSEL field determines trigger.
@@ -78,7 +78,7 @@ void InitAdc(void)
 
 
 	//--- ADCINT1 configuration
-		AdcRegs.INTSEL1N2.bit.INT1CONT = 1;			// ADCINT1 pulses regardless of ADCINT1 flag state
+		AdcRegs.INTSEL1N2.bit.INT1CONT = 0;			// ADCINT1 pulses regardless of ADCINT1 flag state
 		AdcRegs.INTSEL1N2.bit.INT1E = 1;			// Enable ADCINT1
 		AdcRegs.INTSEL1N2.bit.INT1SEL = 0;			// EOC0 triggers ADCINT1
 
