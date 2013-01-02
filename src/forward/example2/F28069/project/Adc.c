@@ -78,7 +78,7 @@ void InitAdc(void)
 
 
 	//--- ADCINT1 configuration
-		AdcRegs.INTSEL1N2.bit.INT1CONT = 0;			// ADCINT1 pulses regardless of ADCINT1 flag state
+		AdcRegs.INTSEL1N2.bit.INT1CONT = 1;			// ADCINT1 pulses regardless of ADCINT1 flag state
 		AdcRegs.INTSEL1N2.bit.INT1E = 1;			// Enable ADCINT1
 		AdcRegs.INTSEL1N2.bit.INT1SEL = 0;			// EOC0 triggers ADCINT1
 
