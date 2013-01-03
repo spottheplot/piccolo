@@ -179,7 +179,7 @@ interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 	adcRes = (AdcResult.ADCRESULT0) ; // + AdcResult.ADCRESULT2 + AdcResult.ADCRESULT3) / 4;
 	dacTest = (adcRes * 0.18);// / Kv / Rl * Ki / 16);
 	intDacTest = (int)(dacTest);
-	Comp1Regs.DACVAL.bit.DACVAL = intDacTest;  //This line will be uncommented when the gains are calculated
+//	Comp1Regs.DACVAL.bit.DACVAL = intDacTest;  //This line will be uncommented when the gains are calculated
 	enableEVT2 = 1;
  	asm(" EALLOW");	// Enable EALLOW protected register access
  	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
@@ -251,41 +251,18 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 	asm (" ESTOP0");							// Emulator Halt instruction
 	while(1);
 }
-int wDUp =50;
+int wDUp = 533;
 int wUDown = 0;
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
-	if (EPwm1Regs.TZFLG.bit.DCAEVT1 == 1) {
-//		int i;
-//		for (i=1; i < 40;  i++) {
-//			asm(" NOP");
-//		}
-//		EPwm1Regs.DCFWINDOW = wUDown;
-//		EPwm1Regs.TBCTL.bit.CTRMODE = 0x3;
-//		EPwm1Regs.TBCTR = 0x0000;
-//		EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;
-//		GpioDataRegs.GPBTOGGLE.bit.GPIO34 = 1;
-		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
-		asm(" EALLOW");	// Enable EALLOW protected register access
-			EPwm1Regs.TZCLR.bit.DCAEVT1 = 1;
-		asm(" EDIS");
-		// --> When ADC Int is called, the freq at which  we can toggle is heavily reduced (from 300kHz to 25kHz)
-	} else if (EPwm1Regs.TZFLG.bit.DCAEVT2 == 1 && enableEVT2 == 1) {
-		asm(" EALLOW");	// Enable EALLOW protected register access
-		EPwm1Regs.DCFWINDOW = wDUp;
-		EPwm1Regs.TBCTL.bit.CTRMODE = 0x3;
-		EPwm1Regs.TBCTR = 0x0000;
-		EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;
-		EPwm1Regs.TZCLR.bit.OST = 1;
-		enableEVT2=0;
-		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
-		asm(" EDIS");
-	}
+//	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
+	AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
+	EPwm1Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
+	EPwm1Regs.TBCTR = 0x0001;
+	EPwm1Regs.TBPRD = wDUp; // Calcular el valor de Toff segun Vout;
+	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
 
-	asm(" EALLOW");	// Enable EALLOW protected register access
-	EPwm1Regs.TZCLR.bit.INT = 1;
-	asm(" EDIS");
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
 
@@ -362,11 +339,20 @@ interrupt void EPWM8_TZINT_ISR(void)			// PIE2.8 @ 0x000D5E  EPWM87_TZINT
 //---------------------------------------------------------------------
 interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 {
+	EPwm1Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
+
+	asm(" EALLOW");	// Enable EALLOW protected register access
+		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
+		EPwm1Regs.TZCLR.bit.CBC = 1;
+		EPwm1Regs.TZCLR.bit.INT = 1;
+	asm(" EDIS");
+
+	EPwm1Regs.ETCLR.bit.INT = 1;
+
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
 
 // Next two lines for debug only - remove after inserting your ISR
-	asm (" ESTOP0");							// Emulator Halt instruction
-	while(1);
+//	asm (" ESTOP0");							// Emulator Halt instruction
 }
 
 //---------------------------------------------------------------------

@@ -43,6 +43,8 @@ void InitEPwm(void)
 // bit 2         0:      PHSEN, 0 = phase control disabled
 // bit 1-0       11:     CTRMODE, 11 = timer stopped (disabled)
 
+	EPwm1Regs.TBCTL.bit.PRDLD = 1;
+
 	EPwm1Regs.TBCTR = 0x0000;				// Clear timer counter
 	EPwm1Regs.TBPRD = 60000;		// Set timer period
 //	EPwm1Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase
@@ -62,12 +64,13 @@ void InitEPwm(void)
 //// bit 1-0       10:     LOADAMODE, 10 = load on zero or PRD match
 //
 //	// 3. Action-Qualifier Module
-//	EPwm1Regs.AQCTLA.all = 0x0000;//0x0060;		// Action-qualifier control register A
+	EPwm1Regs.AQCTLA.all = 0x0000;//0x0060;		// Action-qualifier control register A
+	EPwm1Regs.AQCTLA.bit.PRD = 2;
 //// bit 15-12     0000:   reserved
 //// bit 11-10     00:     CBD, 00 = do nothing
 //// bit 9-8       00:     CBU, 00 = do nothing
-//// bit 7-6       01:     CAD, 01 = clear
-//// bit 5-4       10:     CAU, 10 = set
+//// bit 7-6       00:     CAD, 01 = clear
+//// bit 5-4       00:     CAU, 10 = set
 //// bit 3-2       00:     PRD, 00 = do nothing
 //// bit 1-0       00:     ZRO, 00 = do nothing
 //
@@ -117,53 +120,9 @@ void InitEPwm(void)
 
 		EPwm1Regs.TZDCSEL.all = 0x0000;		// All trip zone and DC compare actions disabled
 
-		// Clear EPwm1A when the input in the comparator 1 is higher than the reference (by generating DCAEVT1)
-				EPwm1Regs.DCTRIPSEL.bit.DCAHCOMPSEL = 8; // Select the source for the Digital Compare A High (DCAH) input --> Comp1Out = DCAH
-						//  0 || 0000 TZ1 input
-						//	1 || 0001 TZ2 input
-						//	2 || 0010 TZ3 input
-						//	8 || 1000 COMP1OUT input
-						//	9 || 1001 COMP2OUT input
-						// 10 || 1010 COMP3OUT input
 
-				// Once set the event signal creation, we want the Trip-Zone Submodule to catch the event and handle it
-				EPwm1Regs.TZDCSEL.bit.DCAEVT1 = 2;//1; //The event signal DCAEVT1 will be sent when Comp1Out goes high (DCAH High)
-						//	0 || 000 Event disabled
-						//	1 || 001 DCAH = low, DCAL = don't care
-						//	2 || 010 DCAH = high, DCAL = don't care
-						//	3 || 011 DCAL = low, DCAH = don't care
-						//	4 || 100 DCAL = high, DCAH = don't care
-						//	5 || 101 DCAL = high, DCAH = low
-
-				EPwm1Regs.DCACTL.bit.EVT1SRCSEL = 1; // Here we choose if we want to filter the signal
-						// 0 Source is DCAEVT Signal
-						// 1 Source is DCAEVTFILT Signal
-
-				EPwm1Regs.DCACTL.bit.EVT1FRCSYNCSEL = 1;  // Force Sync Signal Select
-						// 0 Source is Sync signal
-						// 1 Source is Async Signal
-
-				EPwm1Regs.TZSEL.bit.DCAEVT1 = 1;
-						// Digital Compare Output B Event 1 Select
-						//	0 Disable DCBEVT1 as one-shot-trip source for this ePWM module.
-						//	1 Enable DCBEVT1 as one-shot-trip source for this ePWM module.
-
-				EPwm1Regs.TZCTL.bit.TZA = 2; // When a trip event occurs the following action is taken on output EPwm1A
-						//	0 || 00 High-impedance (EPWMxA = High-impedance state)
-						//	1 || 01 Force EPWMxA to a high state.
-						//	2 || 10 Force EPWMxA to a low state.
-						//	3 || 11 Do Nothing, trip action is disabled
-
-				EPwm1Regs.TZEINT.bit.DCAEVT1 = 1; //Digital Comparator Output A Event 1 Interrupt Enable
-						//0 Disabled
-						//1 Enabled
-
-				EPwm1Regs.TZEINT.bit.OST = 0;	//One Shot Interrupt Enable
-						//0 Disabled
-						//1 Enabled
-
-		// Set EPwm1A when the input in the comparator 2 is lower than the reference (by generating DCAEVT2)
-				EPwm1Regs.DCTRIPSEL.bit.DCALCOMPSEL = 9; // Digital Compare A Low Input Select
+		// Clear EPwm1A when the input in the comparator 1 is higher than the reference (by generating DCAEVT2)
+				EPwm1Regs.DCTRIPSEL.bit.DCAHCOMPSEL = 8; // Digital Compare A Low Input Select
 						//	0 || 0000 TZ1 input
 						//	1 || 0001 TZ2 input
 						//	2 || 0010 TZ3 input
@@ -172,7 +131,7 @@ void InitEPwm(void)
 						// 10 ||1010 COMP3OUT input
 
 				// Once set the event signal creation, we want the Trip-Zone Submodule to catch the event and handle it
-				EPwm1Regs.TZDCSEL.bit.DCAEVT2 = 3; //The event signal DCAEVT2 will be sent when Comp2Out goes low (DCAL Low)
+				EPwm1Regs.TZDCSEL.bit.DCAEVT2 = 2; //The event signal DCAEVT2 will be sent when Comp1Out goes high (DCAH High)
 						//	0 || 000 Event disabled
 						//	1 || 001 DCAH = low, DCAL = don't care
 						//	2 || 010 DCAH = high, DCAL = don't care
@@ -188,10 +147,10 @@ void InitEPwm(void)
 						// 0 Source is Sync signal
 						// 1 Source is Async Signal
 
-				EPwm1Regs.TZSEL.bit.DCAEVT2 = 0;
-						// 1 Enable DCBEVT1 as a CBC trip source event for this ePWM module
+				EPwm1Regs.TZSEL.bit.DCAEVT2 = 1;
+						// 1 Enable DCAEVT2 as a CBC trip source event for this ePWM module
 
-				EPwm1Regs.TZCTL.bit.DCAEVT2 = 3; // When a trip event occurs the following action is taken on output EPwmxA
+				EPwm1Regs.TZCTL.bit.TZA = 2; // When a trip event occurs the following action is taken on output EPwmxA
 						//	0 || 00 High-impedance (EPWMxB = High-impedance state)
 						//	1 || 01 Force EPWMxA to a high state.
 						//	2 || 10 Force EPWMxA to a low state.
@@ -217,7 +176,7 @@ void InitEPwm(void)
 							//		0 Blanking window not inverted
 							//		1 Blanking window inverted
 
-				EPwm1Regs.DCFCTL.bit.SRCSEL = 0;
+				EPwm1Regs.DCFCTL.bit.SRCSEL = 1;
 							//		Filter Block Signal Source Select
 							//		00 Source Is DCAEVT1 Signal
 							//		01 Source Is DCAEVT2 Signal
@@ -242,7 +201,36 @@ void InitEPwm(void)
 
 		asm(" EDIS");						// Disable EALLOW protected register access
 
-	// 7. Set the timer
+	// 7. Event-Trigger Submodule
+    EPwm1Regs.ETSEL.bit.INTSEL = 0x1;   //    ePWM Interrupt (EPWMx_INT) Selection Options
+		//    000 Reserved
+		//    001 Enable event time-base counter equal to zero. (TBCTR = 0x0000)
+		//    010 Enable event time-base counter equal to period (TBCTR = TBPRD)
+		//    011 Enable event time-base counter equal to zero or period (TBCTR = 0x0000 or TBCTR =
+		//    TBPRD). This mode is useful in up-down count mode.
+		//    100 Enable event time-base counter equal to CMPA when the timer is incrementing.
+		//    101 Enable event time-base counter equal to CMPA when the timer is decrementing.
+		//    110 Enable event: time-base counter equal to CMPB when the timer is incrementing.
+		//    111 Enable event: time-base counter equal to CMPB when the timer is decrementing.
+
+    EPwm1Regs.ETSEL.bit.INTEN = 0x1;  // Enable ePWM Interrupt (EPWMx_INT) Generation
+		//    0 Disable EPWMx_INT generation
+		//    1 Enable EPWMx_INT generation
+
+    EPwm1Regs.ETPS.bit.INTPRD = 0x1;           // ePWM Interrupt (EPWMx_INT) Period Select
+		//    00 Disable the interrupt event counter. No interrupt will be generated and ETFRC[INT] is
+		//    ignored.
+		//    01 Generate an interrupt on the first event INTCNT = 01 (first event)
+		//    10 Generate interrupt on ETPS[INTCNT] = 1,0 (second event)
+		//    11 Generate interrupt on ETPS[INTCNT] = 1,1 (third event)
+
+    	// Enable PIE interrupts from et for EPwm1 (EPWM1_TZINT)
+
+    IER |= 0x0004; // Enable INT3 in IER to enable PIE group 3
+
+	PieCtrlRegs.PIEIER3.bit.INTx1 = 1; // Enable EPWM1_INT in PIE group 3
+
+	// 8. Set the timer
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0;
 			//  00 Up-count mode
 			//	01 Down-count mode
