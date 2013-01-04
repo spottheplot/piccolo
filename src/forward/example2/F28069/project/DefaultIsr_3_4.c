@@ -164,9 +164,6 @@ interrupt void USER12_ISR(void)					// 0x000D3E  USER12 (Software interrupt #12)
 
 //---------------------------------------------------------------------
 
-//float Ki = 3.2;
-//float Kv = 0.0085;
-//float Rl = 272; //272;
 double dacTest = 0;
 double adcRes = 0;
 int intDacTest = 0;
@@ -175,14 +172,14 @@ int enableEVT2 = 0;
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
-	GpioDataRegs.GPASET.bit.GPIO2 = 1;
-	adcRes = (AdcResult.ADCRESULT0) ; // + AdcResult.ADCRESULT2 + AdcResult.ADCRESULT3) / 4;
-	dacTest = (adcRes * 0.18);// / Kv / Rl * Ki / 16);
-	intDacTest = (int)(dacTest);
-//	Comp1Regs.DACVAL.bit.DACVAL = intDacTest;  //This line will be uncommented when the gains are calculated
-	enableEVT2 = 1;
+//	GpioDataRegs.GPASET.bit.GPIO2 = 1;
+	intDacTest = (int)(AdcResult.ADCRESULT0 * 0.18);
+//	Comp1Regs.DACVAL.bit.DACVAL = intDacTest;
+
+// 	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
+
  	asm(" EALLOW");	// Enable EALLOW protected register access
- 	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
+
 //--- Manage the ADC registers
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
 
@@ -251,17 +248,23 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 	asm (" ESTOP0");							// Emulator Halt instruction
 	while(1);
 }
-int wDUp = 533;
-int wUDown = 0;
+
+int Toff_PRD = 533;
+int mAllow = 0;
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
 //	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
-	AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
+	GpioDataRegs.GPASET.bit.GPIO2 = 1;
+//	AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
+
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
-	EPwm1Regs.TBCTR = 0x0001;
-	EPwm1Regs.TBPRD = wDUp; // Calcular el valor de Toff segun Vout;
+	EPwm1Regs.TBCTR = 0x0001; // Reset the counter
+	EPwm1Regs.TBPRD = Toff_PRD; // Modify Toff on the fly (for debug purposes, as it is constant);
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
+
+	mAllow = 1; // We allow Vout measure in EPWM1_INT_ISR
+	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
@@ -335,13 +338,20 @@ interrupt void EPWM8_TZINT_ISR(void)			// PIE2.8 @ 0x000D5E  EPWM87_TZINT
 	asm (" ESTOP0");							// Emulator Halt instruction
 	while(1);
 }
-     
+
+    int check = 0;
 //---------------------------------------------------------------------
 interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 {
-	EPwm1Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
+	if (mAllow) {
+		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // We force Vout measure
+		mAllow = 0;
+	} else {
+		check = 1;
+	}
 
 	asm(" EALLOW");	// Enable EALLOW protected register access
+		// Reset the interrupt flags
 		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
 		EPwm1Regs.TZCLR.bit.CBC = 1;
 		EPwm1Regs.TZCLR.bit.INT = 1;
@@ -350,9 +360,6 @@ interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 	EPwm1Regs.ETCLR.bit.INT = 1;
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
-
-// Next two lines for debug only - remove after inserting your ISR
-//	asm (" ESTOP0");							// Emulator Halt instruction
 }
 
 //---------------------------------------------------------------------

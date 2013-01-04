@@ -39,18 +39,12 @@
 #define PI 3.14159f
 #define LOWER_HYSTERESIS_BAND 2 // Sine offset (DAC value at which the sine is zero)
 
+#define TOFF_PRD 533 // Number of clock cycles the coil is being discharged (Toff is aprox constant)
+
 extern int D;
 extern int sinValues[SIN_DEFINITION];
+extern int mAllow;
 
-extern int enableEVT2;
-
-//extern float Ki;
-//extern float Kv;
-//extern float Rl; // Rload set so the forward converter gives Imax = 0.6 A (In our case)
-
-extern int step;
-extern int state;
-extern int plain;
 
 //---------------------------------------------------------------------------
 // Function Prototypes

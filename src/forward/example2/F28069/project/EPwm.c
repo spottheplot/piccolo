@@ -46,13 +46,13 @@ void InitEPwm(void)
 	EPwm1Regs.TBCTL.bit.PRDLD = 1;
 
 	EPwm1Regs.TBCTR = 0x0000;				// Clear timer counter
-	EPwm1Regs.TBPRD = 60000;		// Set timer period
+	EPwm1Regs.TBPRD = TOFF_PRD;		// Set timer period
 //	EPwm1Regs.TBPHS.half.TBPHS = 0x0000;	// Set timer phase
 //
 ////	 2. Compare Module --> We don't need this module set for this example
-//	EPwm1Regs.CMPA.half.CMPA = PWM_DUTY_CYCLE;	// Set PWM duty cycle
+	EPwm1Regs.CMPA.half.CMPA = (int) (TOFF_PRD / 2) - 65;	// Set PWM duty cycle
 //
-//	EPwm1Regs.CMPCTL.all = 0x0002;			// Compare control register
+	EPwm1Regs.CMPCTL.all = 0x0002;			// Compare control register
 //// bit 15-10     0's:    reserved
 //// bit 9         0:      SHDWBFULL, read-only
 //// bit 8         0:      SHDWAFULL, read-only
@@ -65,7 +65,6 @@ void InitEPwm(void)
 //
 //	// 3. Action-Qualifier Module
 	EPwm1Regs.AQCTLA.all = 0x0000;//0x0060;		// Action-qualifier control register A
-	EPwm1Regs.AQCTLA.bit.PRD = 2;
 //// bit 15-12     0000:   reserved
 //// bit 11-10     00:     CBD, 00 = do nothing
 //// bit 9-8       00:     CBU, 00 = do nothing
@@ -202,16 +201,16 @@ void InitEPwm(void)
 		asm(" EDIS");						// Disable EALLOW protected register access
 
 	// 7. Event-Trigger Submodule
-    EPwm1Regs.ETSEL.bit.INTSEL = 0x1;   //    ePWM Interrupt (EPWMx_INT) Selection Options
-		//    000 Reserved
-		//    001 Enable event time-base counter equal to zero. (TBCTR = 0x0000)
-		//    010 Enable event time-base counter equal to period (TBCTR = TBPRD)
-		//    011 Enable event time-base counter equal to zero or period (TBCTR = 0x0000 or TBCTR =
-		//    TBPRD). This mode is useful in up-down count mode.
-		//    100 Enable event time-base counter equal to CMPA when the timer is incrementing.
-		//    101 Enable event time-base counter equal to CMPA when the timer is decrementing.
-		//    110 Enable event: time-base counter equal to CMPB when the timer is incrementing.
-		//    111 Enable event: time-base counter equal to CMPB when the timer is decrementing.
+    EPwm1Regs.ETSEL.bit.INTSEL = 0x4;   //    ePWM Interrupt (EPWMx_INT) Selection Options
+		//    0 || 000 Reserved
+		//    1 || 001 Enable event time-base counter equal to zero. (TBCTR = 0x0000)
+		//    2 || 010 Enable event time-base counter equal to period (TBCTR = TBPRD)
+		//    3 || 011 Enable event time-base counter equal to zero or period (TBCTR = 0x0000 or TBCTR =
+		//    		   TBPRD). This mode is useful in up-down count mode.
+		//    4 || 100 Enable event time-base counter equal to CMPA when the timer is incrementing.
+		//    5 || 101 Enable event time-base counter equal to CMPA when the timer is decrementing.
+		//    6 || 110 Enable event: time-base counter equal to CMPB when the timer is incrementing.
+		//    7 || 111 Enable event: time-base counter equal to CMPB when the timer is decrementing.
 
     EPwm1Regs.ETSEL.bit.INTEN = 0x1;  // Enable ePWM Interrupt (EPWMx_INT) Generation
 		//    0 Disable EPWMx_INT generation
