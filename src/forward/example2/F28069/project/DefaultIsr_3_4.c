@@ -255,16 +255,16 @@ int mAllow = 0;
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
 //	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
-	GpioDataRegs.GPASET.bit.GPIO2 = 1;
-//	AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // Forces SOC0 generation to measure Vout
+//	GpioDataRegs.GPASET.bit.GPIO2 = 1;
 
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
 	EPwm1Regs.TBCTR = 0x0001; // Reset the counter
-	EPwm1Regs.TBPRD = Toff_PRD; // Modify Toff on the fly (for debug purposes, as it is constant);
+	EPwm1Regs.TBPRD = Toff_PRD; // Modify Toff on the fly (for debug purposes, as it is constant)
+	EPwm1Regs.CMPA.half.CMPA = (int) (Toff_PRD / 2) - 65; // Only for debugging purposes as it will be constant
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
 
 	mAllow = 1; // We allow Vout measure in EPWM1_INT_ISR
-	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
+//	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
@@ -343,11 +343,13 @@ interrupt void EPWM8_TZINT_ISR(void)			// PIE2.8 @ 0x000D5E  EPWM87_TZINT
 //---------------------------------------------------------------------
 interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 {
+	GpioDataRegs.GPASET.bit.GPIO2 = 1;
 	if (mAllow) {
 		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // We force Vout measure
 		mAllow = 0;
 	} else {
-		check = 1;
+		check = 1; // For debugging purposes. This way we can know if we need this
+				   // if statement to avoid calling the ADC twice in a cycle
 	}
 
 	asm(" EALLOW");	// Enable EALLOW protected register access
@@ -355,9 +357,11 @@ interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
 		EPwm1Regs.TZCLR.bit.CBC = 1;
 		EPwm1Regs.TZCLR.bit.INT = 1;
+
+		EPwm1Regs.ETCLR.bit.INT = 1;
 	asm(" EDIS");
 
-	EPwm1Regs.ETCLR.bit.INT = 1;
+	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
 }

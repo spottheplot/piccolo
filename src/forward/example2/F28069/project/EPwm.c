@@ -138,7 +138,7 @@ void InitEPwm(void)
 						//	4 || 100 DCAL = high, DCAH = don't
 						//	5 || 101 DCAL = high, DCAH = low
 
-				EPwm1Regs.DCACTL.bit.EVT2SRCSEL = 0; // Here we choose if we want to filter the signal
+				EPwm1Regs.DCACTL.bit.EVT2SRCSEL = 1; // Here we choose if we want to filter the signal
 						// 0 Source is DCAEVT Signal
 						// 1 Source is DCAEVTFILT Signal
 
