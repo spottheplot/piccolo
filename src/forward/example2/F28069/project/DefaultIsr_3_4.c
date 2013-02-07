@@ -263,6 +263,8 @@ interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 	EPwm1Regs.CMPA.half.CMPA = (int) (Toff_PRD / 2) - 65; // Only for debugging purposes as it will be constant
 	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
 
+	EPwm1Regs.ETCLR.bit.INT = 1;
+
 	mAllow = 1; // We allow Vout measure in EPWM1_INT_ISR
 //	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
@@ -355,10 +357,9 @@ interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 	asm(" EALLOW");	// Enable EALLOW protected register access
 		// Reset the interrupt flags
 		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
-		EPwm1Regs.TZCLR.bit.CBC = 1;
+//		EPwm1Regs.TZCLR.bit.CBC = 1;
 		EPwm1Regs.TZCLR.bit.INT = 1;
 
-		EPwm1Regs.ETCLR.bit.INT = 1;
 	asm(" EDIS");
 
 	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
