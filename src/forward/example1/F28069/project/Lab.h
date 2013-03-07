@@ -12,6 +12,7 @@
 #define LAB_H
 
 extern int D;
+extern int phases;
 
 //---------------------------------------------------------------------------
 // Include Standard C Language Header Files
@@ -38,7 +39,7 @@ extern int D;
 
 // Frequency for asymmetric PWM
 //  The system clock runs at 80 Mhz --> ( 80 Mhz / X Hz ) - 1 = PWM_PERIOD
-#define PWM_PERIOD	888		// 666 = 667  Period for 90 kHz Asymmetric PWM
+#define PWM_PERIOD	888		// 1111 888;   Period for 90 kHz Asymmetric PWM
 
 // Duty cycle. The counter will go up each clock cycle. When it reaches PWM_DUTY_CYCLE, it will set PWM signal high.
 // It will remain high until the counter reaches PWM_PERIOD or PWM_HALF_PERIOD. Then the PWM signal and the counter will be reset to 0

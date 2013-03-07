@@ -173,7 +173,7 @@ interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 //	GpioDataRegs.GPASET.bit.GPIO2 = 1;
-	intDacTest = (int)(AdcResult.ADCRESULT0 * 0.18);
+	intDacTest = (int)(AdcResult.ADCRESULT0 * 0.9);
 //	Comp1Regs.DACVAL.bit.DACVAL = intDacTest;
 
 // 	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
@@ -254,19 +254,7 @@ int mAllow = 0;
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
-//	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
-//	GpioDataRegs.GPASET.bit.GPIO2 = 1;
 
-	EPwm1Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
-	EPwm1Regs.TBCTR = 0x0001; // Reset the counter
-	EPwm1Regs.TBPRD = Toff_PRD; // Modify Toff on the fly (for debug purposes, as it is constant)
-	EPwm1Regs.CMPA.half.CMPA = (int) (Toff_PRD / 2) - 65; // Only for debugging purposes as it will be constant
-	EPwm1Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
-
-	EPwm1Regs.ETCLR.bit.INT = 1;
-
-	mAllow = 1; // We allow Vout measure in EPWM1_INT_ISR
-//	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
@@ -276,9 +264,19 @@ interrupt void EPWM2_TZINT_ISR(void)			// PIE2.2 @ 0x000D52  EPWM2_TZINT
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 
-// Next two lines for debug only - remove after inserting your ISR
-	asm (" ESTOP0");							// Emulator Halt instruction
-	while(1);
+	//	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
+	//	GpioDataRegs.GPASET.bit.GPIO2 = 1;
+
+		EPwm2Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
+		EPwm2Regs.TBCTR = 0x0001; // Reset the counter
+		EPwm2Regs.TBPRD = Toff_PRD; // Modify Toff on the fly (for debug purposes, as it is constant)
+		EPwm2Regs.CMPA.half.CMPA = (int) (Toff_PRD / 2) - 65; // Only for debugging purposes as it will be constant
+		EPwm2Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
+
+		EPwm2Regs.ETCLR.bit.INT = 1;
+
+		mAllow = 1; // We allow Vout measure in EPWM1_INT_ISR
+	//	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 }
 
 //---------------------------------------------------------------------
@@ -345,24 +343,6 @@ interrupt void EPWM8_TZINT_ISR(void)			// PIE2.8 @ 0x000D5E  EPWM87_TZINT
 //---------------------------------------------------------------------
 interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 {
-	GpioDataRegs.GPASET.bit.GPIO2 = 1;
-	if (mAllow) {
-		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // We force Vout measure
-		mAllow = 0;
-	} else {
-		check = 1; // For debugging purposes. This way we can know if we need this
-				   // if statement to avoid calling the ADC twice in a cycle
-	}
-
-	asm(" EALLOW");	// Enable EALLOW protected register access
-		// Reset the interrupt flags
-		EPwm1Regs.TZCLR.bit.DCAEVT2 = 1;
-//		EPwm1Regs.TZCLR.bit.CBC = 1;
-		EPwm1Regs.TZCLR.bit.INT = 1;
-
-	asm(" EDIS");
-
-	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
 }
@@ -372,9 +352,25 @@ interrupt void EPWM2_INT_ISR(void)				// PIE3.2 @ 0x000D62  EPWM2_INT
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
 
-// Next two lines for debug only - remove after inserting your ISR
-	asm (" ESTOP0");							// Emulator Halt instruction
-	while(1);
+	GpioDataRegs.GPASET.bit.GPIO2 = 1;
+		if (mAllow) {
+			AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // We force Vout measure
+			mAllow = 0;
+		} else {
+			check = 1; // For debugging purposes. This way we can know if we need this
+					   // if statement to avoid calling the ADC twice in a cycle
+		}
+
+		asm(" EALLOW");	// Enable EALLOW protected register access
+			// Reset the interrupt flags
+			EPwm2Regs.TZCLR.bit.DCAEVT2 = 1;
+	//		EPwm2Regs.TZCLR.bit.CBC = 1;
+			EPwm2Regs.TZCLR.bit.INT = 1;
+
+		asm(" EDIS");
+
+		GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
+
 }
 
 //---------------------------------------------------------------------

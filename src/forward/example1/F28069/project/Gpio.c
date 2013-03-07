@@ -26,9 +26,9 @@ void InitGpio(void)
 	GpioCtrlRegs.GPAPUD.all   = 0x00000FFF;		// Pullups enabled GPIO31-12, disabled GPIO11-0
 
 	GpioCtrlRegs.GPAMUX1.bit.GPIO0  = 1;		// 0=GPIO               1=EPWM1A     2=rsvd       3=rsvd
-	GpioCtrlRegs.GPAMUX1.bit.GPIO1  = 1;		// 0=GPIO               1=EPWM1B     2=rsvd       3=COMP1OUT
-	GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 0;		// 0=GPIO               1=EPWM2A     2=rsvd       3=rsvd
-	GpioCtrlRegs.GPAMUX1.bit.GPIO3  = 3;		// 0=GPIO               1=EPWM2B     2=SPISOMIA   3=COMP2OUT
+	GpioCtrlRegs.GPAMUX1.bit.GPIO1  = 0;		// 0=GPIO               1=EPWM1B     2=rsvd       3=COMP1OUT
+	GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 1;		// 0=GPIO               1=EPWM2A     2=rsvd       3=rsvd
+	GpioCtrlRegs.GPAMUX1.bit.GPIO3  = 0;		// 0=GPIO               1=EPWM2B     2=SPISOMIA   3=COMP2OUT
 	GpioCtrlRegs.GPAMUX1.bit.GPIO4  = 0;		// 0=GPIO               1=EPWM3A     2=rsvd       3=rsvd
 	GpioCtrlRegs.GPAMUX1.bit.GPIO5  = 0;		// 0=GPIO               1=EPWM3B     2=SPISIMOA   3=ECAP1
 	GpioCtrlRegs.GPAMUX1.bit.GPIO6  = 0;		// 0=GPIO               1=EPWM4A     2=EPWMSYNCI  3=EPWMSYNCO
@@ -118,10 +118,27 @@ void InitGpio(void)
 	GpioIntRegs.GPIOLPMSEL.all = 0x00000000;	// No pin selected for HALT and STANBY wakeup (reset default)
 
 //--- Selected pin configurations
+	// Enables multiphase (outputs)
+	// Phase 1
+	GpioCtrlRegs.GPADIR.bit.GPIO1 = 1;			// GPIO01 is an output
+	// Phase 2
 	GpioCtrlRegs.GPBDIR.bit.GPIO34 = 1;			// GPIO34 is an output (connected to LED on F28069 ControlSTICK)
-	GpioDataRegs.GPBSET.bit.GPIO34 = 1;			// GPIO34 pin is set to 1 (turn LED on)
-
+	// Phase 3
 	GpioCtrlRegs.GPADIR.bit.GPIO18 = 1;			// GPIO18 is an output (used for test - pin toggle)
+	// Phase 4
+	GpioCtrlRegs.GPADIR.bit.GPIO19 = 1;			// GPIO19 is an output
+	// Phase 5
+	GpioCtrlRegs.GPADIR.bit.GPIO3 = 1;			// GPIO03 is an output
+	// Phase 6
+	GpioCtrlRegs.GPADIR.bit.GPIO16 = 1;			// GPIO016 is an output
+	// Phase 7
+	GpioCtrlRegs.GPADIR.bit.GPIO17 = 1;			// GPIO016 is an output
+	// Phase 8
+	GpioCtrlRegs.GPADIR.bit.GPIO4 = 1;			// GPIO016 is an output
+
+
+	//GpioDataRegs.GPBSET.bit.GPIO34 = 1;			// GPIO34 pin is set to 1 (turn LED on)
+
 
 	GpioCtrlRegs.GPADIR.bit.GPIO2 = 1;
 	GpioCtrlRegs.GPADIR.bit.GPIO3 = 1;
@@ -130,6 +147,17 @@ void InitGpio(void)
 	GpioDataRegs.GPASET.bit.GPIO2 = 0;
 	GpioDataRegs.GPASET.bit.GPIO3 = 0;
 	GpioDataRegs.GPASET.bit.GPIO4 = 1;
+
+	// Change output pin enable; initialize to zero
+	GpioDataRegs.GPADAT.bit.GPIO1 = 1;
+	GpioDataRegs.GPBDAT.bit.GPIO34 = 0;
+	GpioDataRegs.GPADAT.bit.GPIO18 = 0;
+	GpioDataRegs.GPADAT.bit.GPIO19 = 0;
+
+	GpioDataRegs.GPADAT.bit.GPIO3 = 0;
+	GpioDataRegs.GPADAT.bit.GPIO16 = 0;
+	GpioDataRegs.GPADAT.bit.GPIO17 = 0;
+	GpioDataRegs.GPADAT.bit.GPIO4 = 0;
 
 
 //--- Finish up

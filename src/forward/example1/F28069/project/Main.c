@@ -36,6 +36,8 @@ void main(void)
 	//--- Main Loop
 		while(1)							// endless loop - wait for an interrupt
 		{
+			if (EPwm2Regs.CMPA.half.CMPA > (EPwm2Regs.TBPRD/2))
+					EPwm2Regs.CMPA.half.CMPA = (EPwm2Regs.TBPRD/2);
 			asm(" NOP");
 		}
 

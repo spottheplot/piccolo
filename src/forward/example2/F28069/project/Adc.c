@@ -95,7 +95,7 @@ void InitAdc(void)
 		Comp1Regs.COMPCTL.bit.SYNCSEL = 0; //Asynchronous Comp1 Output
 		Comp1Regs.COMPCTL.bit.QUALSEL =  0; // Don't Care
 
-		Comp1Regs.DACVAL.bit.DACVAL = 550; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
+		Comp1Regs.DACVAL.bit.DACVAL = 300; // 10 bits [0-1023] Not used this time. Generates V = DACVAL * 3.3 / 1023 on DAC signal
 
 		 AdcRegs.ADCCTL1.bit.ADCBGPWD = 1; // It's already been enabled, but it's necessary to enable it for the comparator to work
 

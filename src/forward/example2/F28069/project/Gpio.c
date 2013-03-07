@@ -27,8 +27,8 @@ void InitGpio(void)
 
 	GpioCtrlRegs.GPAMUX1.bit.GPIO0  = 1;		// 0=GPIO               1=EPWM1A     2=rsvd       3=rsvd
 	GpioCtrlRegs.GPAMUX1.bit.GPIO1  = 3;		// 0=GPIO               1=EPWM1B     2=rsvd       3=COMP1OUT
-	GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 0;		// 0=GPIO               1=EPWM2A     2=rsvd       3=rsvd
-	GpioCtrlRegs.GPAMUX1.bit.GPIO3  = 3;		// 0=GPIO               1=EPWM2B     2=SPISOMIA   3=COMP2OUT
+	GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 1;		// 0=GPIO               1=EPWM2A     2=rsvd       3=rsvd
+	GpioCtrlRegs.GPAMUX1.bit.GPIO3  = 1;		// 0=GPIO               1=EPWM2B     2=SPISOMIA   3=COMP2OUT
 	GpioCtrlRegs.GPAMUX1.bit.GPIO4  = 0;		// 0=GPIO               1=EPWM3A     2=rsvd       3=rsvd
 	GpioCtrlRegs.GPAMUX1.bit.GPIO5  = 0;		// 0=GPIO               1=EPWM3B     2=SPISIMOA   3=ECAP1
 	GpioCtrlRegs.GPAMUX1.bit.GPIO6  = 0;		// 0=GPIO               1=EPWM4A     2=EPWMSYNCI  3=EPWMSYNCO

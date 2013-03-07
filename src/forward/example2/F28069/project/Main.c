@@ -47,7 +47,7 @@ void main(void)
 	asm(" clrc DBGM");
 
 	// Force EPwm1 high
-	EPwm1Regs.AQCSFRC.bit.CSFA = 2; // Invoke One-Time Software Forced Event on Output A
+	EPwm2Regs.AQCSFRC.bit.CSFA = 2; // Invoke One-Time Software Forced Event on Output A
 
 	// Enable global interrupts (Must be enabled after forcing EPwm1 high, otherwise it may be stuck in TZ_INT1 interrupt)
 	asm(" clrc INTM");
