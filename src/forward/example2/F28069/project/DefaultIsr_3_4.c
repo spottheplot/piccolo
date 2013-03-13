@@ -168,16 +168,18 @@ double dacTest = 0;
 double adcRes = 0;
 int intDacTest = 0;
 int enableEVT2 = 0;
+int Vout;
 
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
-//	GpioDataRegs.GPASET.bit.GPIO2 = 1;
-	intDacTest = (int)(AdcResult.ADCRESULT0 * 0.9);
-//	Comp1Regs.DACVAL.bit.DACVAL = intDacTest;
 
-// 	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
-
+	Vout = (int)(AdcResult.ADCRESULT0 * 0.095); // Vout measurement
+	intDacTest = (int) (Vout * 2.5); // 2.5 is the gain conversion from Vout to ILpeak(ADC wise)
+	// Protection for avoiding transformer saturation and optional hysteresis
+	if ((abs(intDacTest - Comp1Regs.DACVAL.bit.DACVAL) > 1) && (intDacTest < 320)) {
+		Comp1Regs.DACVAL.bit.DACVAL = intDacTest; // Setting IL peak
+	}
  	asm(" EALLOW");	// Enable EALLOW protected register access
 
 //--- Manage the ADC registers
@@ -254,8 +256,6 @@ int mAllow = 0;
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
 {
-
-
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 }
 
@@ -264,9 +264,6 @@ interrupt void EPWM2_TZINT_ISR(void)			// PIE2.2 @ 0x000D52  EPWM2_TZINT
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;		// Must acknowledge the PIE group
 
-	//	GpioDataRegs.GPATOGGLE.bit.GPIO2 = 1;
-	//	GpioDataRegs.GPASET.bit.GPIO2 = 1;
-
 		EPwm2Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
 		EPwm2Regs.TBCTR = 0x0001; // Reset the counter
 		EPwm2Regs.TBPRD = Toff_PRD; // Modify Toff on the fly (for debug purposes, as it is constant)
@@ -274,9 +271,7 @@ interrupt void EPWM2_TZINT_ISR(void)			// PIE2.2 @ 0x000D52  EPWM2_TZINT
 		EPwm2Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
 
 		EPwm2Regs.ETCLR.bit.INT = 1;
-
 		mAllow = 1; // We allow Vout measure in EPWM1_INT_ISR
-	//	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 }
 
 //---------------------------------------------------------------------
@@ -352,25 +347,17 @@ interrupt void EPWM2_INT_ISR(void)				// PIE3.2 @ 0x000D62  EPWM2_INT
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
 
-	GpioDataRegs.GPASET.bit.GPIO2 = 1;
-		if (mAllow) {
-			AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // We force Vout measure
-			mAllow = 0;
-		} else {
-			check = 1; // For debugging purposes. This way we can know if we need this
-					   // if statement to avoid calling the ADC twice in a cycle
-		}
+	if (mAllow) {
+		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // We force Vout measure
+		mAllow = 0;
+	}
+	asm(" EALLOW");	// Enable EALLOW protected register access
+		// Reset the interrupt flags
+		EPwm2Regs.TZCLR.bit.DCAEVT2 = 1;
+		EPwm2Regs.TZCLR.bit.INT = 1;
+	asm(" EDIS");
 
-		asm(" EALLOW");	// Enable EALLOW protected register access
-			// Reset the interrupt flags
-			EPwm2Regs.TZCLR.bit.DCAEVT2 = 1;
-	//		EPwm2Regs.TZCLR.bit.CBC = 1;
-			EPwm2Regs.TZCLR.bit.INT = 1;
-
-		asm(" EDIS");
-
-		GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
-
+	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 }
 
 //---------------------------------------------------------------------
