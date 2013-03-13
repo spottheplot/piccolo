@@ -45,6 +45,9 @@ extern int D;
 extern int sinValues[SIN_DEFINITION];
 extern int mAllow;
 
+extern float pFactor; // Modifies Pout = pFactor * Poutinitial
+						// Modifying this value will update ILpeak and Toff so we can work in boundary
+
 
 //---------------------------------------------------------------------------
 // Function Prototypes

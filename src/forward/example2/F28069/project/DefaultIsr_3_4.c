@@ -169,15 +169,16 @@ double adcRes = 0;
 int intDacTest = 0;
 int enableEVT2 = 0;
 int Vout;
+float pFactor = 1;
 
 interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
 
 	Vout = (int)(AdcResult.ADCRESULT0 * 0.095); // Vout measurement
-	intDacTest = (int) (Vout * 2.5); // 2.5 is the gain conversion from Vout to ILpeak(ADC wise)
+	intDacTest = (int) (Vout * 2.5 * pFactor); // 2.5 is the gain conversion from Vout to ILpeak(ADC wise)
 	// Protection for avoiding transformer saturation and optional hysteresis
-	if ((abs(intDacTest - Comp1Regs.DACVAL.bit.DACVAL) > 1) && (intDacTest < 320)) {
+	if ((abs(intDacTest - Comp1Regs.DACVAL.bit.DACVAL) > 1) && (intDacTest < (320 * pFactor))) {
 		Comp1Regs.DACVAL.bit.DACVAL = intDacTest; // Setting IL peak
 	}
  	asm(" EALLOW");	// Enable EALLOW protected register access
@@ -251,7 +252,7 @@ interrupt void WAKEINT_ISR(void)				// PIE1.8 @ 0x000D4E  WAKEINT (LPM/WD)
 	while(1);
 }
 
-int Toff_PRD = 533;
+int Toff_PRD = 600;
 int mAllow = 0;
 //---------------------------------------------------------------------
 interrupt void EPWM1_TZINT_ISR(void)			// PIE2.1 @ 0x000D50  EPWM1_TZINT
@@ -266,7 +267,7 @@ interrupt void EPWM2_TZINT_ISR(void)			// PIE2.2 @ 0x000D52  EPWM2_TZINT
 
 		EPwm2Regs.TBCTL.bit.CTRMODE = 0x3; // Stop the EPWM1 counter
 		EPwm2Regs.TBCTR = 0x0001; // Reset the counter
-		EPwm2Regs.TBPRD = Toff_PRD; // Modify Toff on the fly (for debug purposes, as it is constant)
+		EPwm2Regs.TBPRD = (int)(Toff_PRD * pFactor); // Modify Toff on the fly (for debug purposes, as it is constant)
 		EPwm2Regs.CMPA.half.CMPA = (int) (Toff_PRD / 2) - 65; // Only for debugging purposes as it will be constant
 		EPwm2Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
 
