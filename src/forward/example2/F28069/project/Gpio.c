@@ -127,6 +127,7 @@ void InitGpio(void)
 	GpioCtrlRegs.GPADIR.bit.GPIO3 = 1;
 	GpioCtrlRegs.GPADIR.bit.GPIO4 = 1;
 
+	GpioDataRegs.GPADAT.bit.GPIO2 = 0;
 	GpioDataRegs.GPASET.bit.GPIO4 = 1;
 
 

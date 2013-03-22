@@ -177,10 +177,12 @@ interrupt void ADCINT1_ISR(void)				// PIE1.1 @ 0x000D40  ADCINT1
 
 	Vout = (int)(AdcResult.ADCRESULT0 * 0.095); // Vout measurement
 	intDacTest = (int) (Vout * 2.5 * pFactor); // 2.5 is the gain conversion from Vout to ILpeak(ADC wise)
+
 	// Protection for avoiding transformer saturation and optional hysteresis
 	if ((abs(intDacTest - Comp1Regs.DACVAL.bit.DACVAL) > 1) && (intDacTest < (320 * pFactor))) {
 		Comp1Regs.DACVAL.bit.DACVAL = intDacTest; // Setting IL peak
 	}
+
  	asm(" EALLOW");	// Enable EALLOW protected register access
 
 //--- Manage the ADC registers
@@ -271,7 +273,7 @@ interrupt void EPWM2_TZINT_ISR(void)			// PIE2.2 @ 0x000D52  EPWM2_TZINT
 		EPwm2Regs.CMPA.half.CMPA = (int) (Toff_PRD / 2) - 65; // Only for debugging purposes as it will be constant
 		EPwm2Regs.TBCTL.bit.CTRMODE = 0x0; // Start the timer in Up-count mode
 
-		EPwm2Regs.ETCLR.bit.INT = 1;
+//		EPwm2Regs.ETCLR.bit.INT = 1;
 		mAllow = 1; // We allow Vout measure in EPWM1_INT_ISR
 }
 
@@ -343,22 +345,36 @@ interrupt void EPWM1_INT_ISR(void)				// PIE3.1 @ 0x000D60  EPWM1_INT
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
 }
 
+
+int zMode = 0;
 //---------------------------------------------------------------------
 interrupt void EPWM2_INT_ISR(void)				// PIE3.2 @ 0x000D62  EPWM2_INT
 {
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;		// Must acknowledge the PIE group
 
-	if (mAllow) {
+	if (mAllow || zMode) {
 		AdcRegs.ADCSOCFRC1.bit.SOC0 = 1; // We force Vout measure
 		mAllow = 0;
 	}
+
+	if (Vout < 50) {
+		asm(" EALLOW");
+		GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 0;
+		asm(" EDIS");
+		zMode = 1;
+	} else {
+		asm(" EALLOW");
+		GpioCtrlRegs.GPAMUX1.bit.GPIO2  = 1;
+		asm(" EDIS");
+		zMode = 0;
+	}
+
 	asm(" EALLOW");	// Enable EALLOW protected register access
 		// Reset the interrupt flags
 		EPwm2Regs.TZCLR.bit.DCAEVT2 = 1;
 		EPwm2Regs.TZCLR.bit.INT = 1;
+		EPwm2Regs.ETCLR.bit.INT = 1;
 	asm(" EDIS");
-
-	GpioDataRegs.GPACLEAR.bit.GPIO2 = 1;
 }
 
 //---------------------------------------------------------------------
